@@ -1,3 +1,11 @@
+@import url("./buttons.css");
+@import url("./cards.css");
+@import url("./forms.css");
+@import url("./navbar.css");
+@import url("./pages.css");
+@import url("./animations.css");
+@import url("./footer.css");
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -9,6 +17,8 @@ html {
 }
 
 body {
+  min-width: 320px;
+  min-height: 100vh;
   background: var(--color-background);
   color: var(--color-text);
   font-family:
@@ -19,6 +29,7 @@ body {
     sans-serif;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 button,
@@ -32,6 +43,10 @@ button {
   border: none;
   background: none;
   cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
 }
 
 a {
