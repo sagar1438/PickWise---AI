@@ -1,9 +1,7 @@
+import { Outlet } from "react-router-dom";
+
 function App() {
-  return (
-    <main>
-      <h1>PickWise - AI</h1>
-    </main>
-  );
+  return <Outlet />;
 }
 
 export default App;
