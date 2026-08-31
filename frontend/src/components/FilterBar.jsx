@@ -30,7 +30,17 @@ function FilterBar({
           <option value="general-purpose">General Purpose</option>
         </select>
 
-        
+        <select
+          value={sortBy}
+          onChange={(event) => onSortChange(event.target.value)}
+          className="form-select"
+          aria-label="Sort models"
+        >
+          <option value="name">Name</option>
+          <option value="quality">Quality</option>
+          <option value="speed">Speed</option>
+          <option value="cost">Cost</option>
+        </select>
       </div>
     </div>
   );
