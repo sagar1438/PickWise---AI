@@ -79,7 +79,30 @@ function FindModel() {
                   </select>
                 </div>
 
-                
+                <div className="form-group">
+                  <label htmlFor="task" className="form-label">
+                    Task
+                  </label>
+
+                  <select
+                    id="task"
+                    name="task"
+                    className="form-select"
+                    defaultValue=""
+                  >
+                    <option value="" disabled>
+                      Select task
+                    </option>
+                    <option value="chat">Chat</option>
+                    <option value="coding">Coding</option>
+                    <option value="vision">Vision</option>
+                    <option value="reasoning">Reasoning</option>
+                    <option value="embeddings">Embeddings</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+              </div>
+
               <div className="find-model__capabilities">
                 <p className="form-label">Capabilities</p>
 
