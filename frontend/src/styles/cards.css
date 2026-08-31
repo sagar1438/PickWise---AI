@@ -1,84 +1,40 @@
-.card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-  transition:
-    transform 0.2s ease,
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
+.model-card {
+  height: 100%;
 }
 
-.card:hover {
-  transform: translateY(-3px);
-  border-color: #dcdcdc;
-  box-shadow: var(--shadow-md);
-}
-
-.card__content {
-  padding: 24px;
-}
-
-.card__title {
-  font-size: 18px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-}
-
-.card__description {
-  margin-top: 8px;
-  color: var(--color-text-muted);
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.card__meta {
+.model-card__top {
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 16px;
-}
-
-.card__footer {
-  display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
-  margin-top: 24px;
-  padding-top: 18px;
-  border-top: 1px solid var(--color-border);
+  gap: 20px;
 }
 
-.model-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 28px;
-  padding: 0 10px;
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
-  background: var(--color-background);
+.model-card__top svg {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
+.model-card__provider {
+  margin-bottom: 6px;
   color: var(--color-text-muted);
   font-size: 12px;
   font-weight: 600;
-  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
-.model-badge--primary {
-  border-color: rgba(91, 92, 226, 0.16);
-  background: rgba(91, 92, 226, 0.08);
+.model-card__label {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.model-card__link {
   color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 600;
+  transition: color 0.2s ease;
 }
 
-.model-badge--success {
-  border-color: rgba(53, 185, 143, 0.16);
-  background: rgba(53, 185, 143, 0.08);
-  color: var(--color-success);
-}
-
-.model-badge--accent {
-  border-color: rgba(59, 130, 246, 0.16);
-  background: rgba(59, 130, 246, 0.08);
-  color: var(--color-accent);
+.model-card__link:hover {
+  color: #4849c9;
 }
