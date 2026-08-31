@@ -49,3 +49,36 @@
   padding-top: 18px;
   border-top: 1px solid var(--color-border);
 }
+
+.model-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-background);
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.model-badge--primary {
+  border-color: rgba(91, 92, 226, 0.16);
+  background: rgba(91, 92, 226, 0.08);
+  color: var(--color-primary);
+}
+
+.model-badge--success {
+  border-color: rgba(53, 185, 143, 0.16);
+  background: rgba(53, 185, 143, 0.08);
+  color: var(--color-success);
+}
+
+.model-badge--accent {
+  border-color: rgba(59, 130, 246, 0.16);
+  background: rgba(59, 130, 246, 0.08);
+  color: var(--color-accent);
+}
