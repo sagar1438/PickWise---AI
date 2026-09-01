@@ -63,7 +63,84 @@ const models = [
   },
 ];
 
+function Discover() {
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("all");
+  const [sortBy, setSortBy] = useState("name");
 
+  const filteredModels = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
+
+    const result = models.filter((model) => {
+      const matchesSearch =
+        normalizedSearch === "" ||
+        model.name.toLowerCase().includes(normalizedSearch) ||
+        model.provider.toLowerCase().includes(normalizedSearch) ||
+        model.category.toLowerCase().includes(normalizedSearch);
+
+      const matchesCategory =
+        category === "all" ||
+        model.category.toLowerCase().replace(/\s+/g, "-") === category;
+
+      return matchesSearch && matchesCategory;
+    });
+
+    return [...result].sort((first, second) => {
+      if (sortBy === "name") {
+        return first.name.localeCompare(second.name);
+      }
+
+      return 0;
+    });
+  }, [search, category, sortBy]);
+
+  return (
+    <div className="page">
+      <Navbar />
+
+      <main>
+        <section className="discover">
+          <div className="page__container">
+            <div className="discover__header fade-in">
+              <p className="section__eyebrow">DISCOVER</p>
+
+              <h1 className="discover__title">
+                Explore AI models built for different needs.
+              </h1>
+
+              <p className="discover__description">
+                Search the catalog, browse categories, and explore models
+                before deciding which one fits your project.
+              </p>
+            </div>
+
+            <div className="discover__toolbar">
+              <SearchBar
+                value={search}
+                onChange={setSearch}
+                onClear={() => setSearch("")}
+                placeholder="Search models, providers, or capabilities..."
+              />
+
+              <FilterBar
+                category={category}
+                onCategoryChange={setCategory}
+                sortBy={sortBy}
+                onSortChange={setSortBy}
+              />
+            </div>
+
+            {filteredModels.length > 0 ? (
+              <ModelGrid models={filteredModels} />
+            ) : (
+              <EmptyState
+                title="No matching models"
+                description="Try a different search term or category."
+              />
+            )}
+          </div>
+        </section>
+      </main>
 
       <Footer />
     </div>
