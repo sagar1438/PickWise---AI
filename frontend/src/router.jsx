@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import App from "./App";
 import Home from "./pages/Home";
 import FindModel from "./pages/FindModel";
+import Recommendations from "./pages/Recommendations";
 
 const router = createBrowserRouter([
   {
@@ -15,6 +16,10 @@ const router = createBrowserRouter([
       {
         path: "find-model",
         element: <FindModel />,
+      },
+      {
+        path: "recommendations",
+        element: <Recommendations />,
       },
     ],
   },
