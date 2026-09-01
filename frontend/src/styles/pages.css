@@ -252,6 +252,42 @@
   gap: 20px;
 }
 
+/* Discover */
+
+.discover {
+  padding: 96px 0 110px;
+}
+
+.discover__header {
+  max-width: 800px;
+  margin-bottom: 48px;
+}
+
+.discover__title {
+  max-width: 820px;
+  font-size: clamp(44px, 6vw, 72px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.06em;
+}
+
+.discover__description {
+  max-width: 620px;
+  margin-top: 24px;
+  color: var(--color-text-muted);
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+.discover__toolbar {
+  margin-bottom: 28px;
+}
+
+.discover__toolbar > .search-bar {
+  max-width: 620px;
+  margin-bottom: 16px;
+}
+
 /* Responsive */
 
 @media (max-width: 900px) {
@@ -309,12 +345,14 @@
   }
 
   .find-model__title,
-  .recommendations__title {
+  .recommendations__title,
+  .discover__title {
     font-size: clamp(42px, 13vw, 60px);
   }
 
   .find-model__description,
-  .recommendations__description {
+  .recommendations__description,
+  .discover__description {
     font-size: 16px;
   }
 
@@ -327,6 +365,10 @@
   }
 
   .recommendations {
+    padding: 72px 0 88px;
+  }
+
+  .discover {
     padding: 72px 0 88px;
   }
 }
