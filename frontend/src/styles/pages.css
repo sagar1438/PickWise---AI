@@ -219,6 +219,39 @@
   accent-color: var(--color-primary);
 }
 
+/* Recommendations */
+
+.recommendations {
+  padding: 96px 0 110px;
+}
+
+.recommendations__header {
+  max-width: 760px;
+  margin-bottom: 48px;
+}
+
+.recommendations__title {
+  max-width: 800px;
+  font-size: clamp(44px, 6vw, 72px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.06em;
+}
+
+.recommendations__description {
+  max-width: 620px;
+  margin-top: 24px;
+  color: var(--color-text-muted);
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+.recommendations__list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 /* Responsive */
 
 @media (max-width: 900px) {
@@ -275,11 +308,13 @@
     padding: 72px 0 88px;
   }
 
-  .find-model__title {
+  .find-model__title,
+  .recommendations__title {
     font-size: clamp(42px, 13vw, 60px);
   }
 
-  .find-model__description {
+  .find-model__description,
+  .recommendations__description {
     font-size: 16px;
   }
 
@@ -289,5 +324,9 @@
 
   .find-model__capabilities {
     align-items: stretch;
+  }
+
+  .recommendations {
+    padding: 72px 0 88px;
   }
 }
