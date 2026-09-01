@@ -1,10 +1,22 @@
 import { createBrowserRouter } from "react-router-dom";
+import App from "./App";
 import Home from "./pages/Home";
+import FindModel from "./pages/FindModel";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Home />,
+    element: <App />,
+    children: [
+      {
+        index: true,
+        element: <Home />,
+      },
+      {
+        path: "find-model",
+        element: <FindModel />,
+      },
+    ],
   },
 ]);
 
