@@ -5,6 +5,8 @@ import FindModel from "./pages/FindModel";
 import Recommendations from "./pages/Recommendations";
 import Discover from "./pages/Discover";
 import Trending from "./pages/Trending";
+import NewReleases from "./pages/NewReleases";
+import Compare from "./pages/Compare";
 
 const router = createBrowserRouter([
   {
@@ -30,6 +32,14 @@ const router = createBrowserRouter([
       {
         path: "trending",
         element: <Trending />,
+      },
+      {
+        path: "releases",
+        element: <NewReleases />,
+      },
+      {
+        path: "compare",
+        element: <Compare />,
       },
     ],
   },
