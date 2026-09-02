@@ -3,6 +3,8 @@ import App from "./App";
 import Home from "./pages/Home";
 import FindModel from "./pages/FindModel";
 import Recommendations from "./pages/Recommendations";
+import Discover from "./pages/Discover";
+import Trending from "./pages/Trending";
 
 const router = createBrowserRouter([
   {
@@ -20,6 +22,14 @@ const router = createBrowserRouter([
       {
         path: "recommendations",
         element: <Recommendations />,
+      },
+      {
+        path: "discover",
+        element: <Discover />,
+      },
+      {
+        path: "trending",
+        element: <Trending />,
       },
     ],
   },
