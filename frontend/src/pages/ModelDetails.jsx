@@ -126,3 +126,151 @@ function ModelDetails() {
     );
   }
 
+  return (
+    <div className="page">
+      <Navbar />
+
+      <main>
+        <section className="model-details">
+          <div className="page__container">
+            <Link to="/discover" className="model-details__back">
+              <ArrowLeft size={16} />
+              Back to Discover
+            </Link>
+
+            <div className="model-details__hero fade-in">
+              <div>
+                <p className="section__eyebrow">{model.provider}</p>
+
+                <div className="model-details__title-row">
+                  <h1 className="model-details__title">{model.name}</h1>
+                  <ModelBadge variant="primary">
+                    {model.category}
+                  </ModelBadge>
+                </div>
+
+                <p className="model-details__description">
+                  {model.description}
+                </p>
+              </div>
+
+              <div className="model-details__actions">
+                <Button to={`/compare?model=${model.id}`} variant="secondary">
+                  Compare model
+                </Button>
+
+                <Button to="/find-model">Find my match</Button>
+              </div>
+            </div>
+
+            <div className="model-details__overview">
+              <div>
+                <span>Release</span>
+                <strong>{model.releaseDate}</strong>
+              </div>
+
+              <div>
+                <span>Context</span>
+                <strong>{model.context}</strong>
+              </div>
+
+              <div>
+                <span>Pricing</span>
+                <strong>{model.pricing}</strong>
+              </div>
+            </div>
+
+            <div className="model-details__content">
+              <section className="model-details__section">
+                <div className="model-details__section-header">
+                  <p className="section__eyebrow">CAPABILITIES</p>
+                  <h2>What this model can do.</h2>
+                </div>
+
+                <div className="model-details__capabilities">
+                  {model.capabilities.map((capability) => {
+                    const Icon = capability.icon;
+
+                    return (
+                      <div
+                        className={`capability-card ${
+                          capability.supported
+                            ? "capability-card--supported"
+                            : "capability-card--unsupported"
+                        }`}
+                        key={capability.name}
+                      >
+                        <Icon size={18} />
+
+                        <div>
+                          <strong>{capability.name}</strong>
+                          <span>
+                            {capability.supported
+                              ? "Supported"
+                              : "Not supported"}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+
+              <section className="model-details__section">
+                <div className="model-details__two-column">
+                  <div>
+                    <p className="section__eyebrow">STRENGTHS</p>
+
+                    <ul className="detail-list">
+                      {model.strengths.map((strength) => (
+                        <li key={strength}>
+                          <Check size={16} />
+                          <span>{strength}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div>
+                    <p className="section__eyebrow">WEAKNESSES</p>
+
+                    <ul className="detail-list">
+                      {model.weaknesses.map((weakness) => (
+                        <li key={weakness}>
+                          <X size={16} />
+                          <span>{weakness}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </section>
+
+              <section className="model-details__section">
+                <div className="model-details__section-header">
+                  <p className="section__eyebrow">USE CASES</p>
+                  <h2>Where it fits best.</h2>
+                </div>
+
+                <div className="model-details__use-cases">
+                  {model.useCases.map((useCase) => (
+                    <ModelBadge key={useCase}>{useCase}</ModelBadge>
+                  ))}
+                </div>
+              </section>
+            </div>
+
+            <p className="model-details__note">
+              Model information shown here is temporary demo data and will be
+              replaced with verified model information from the backend.
+            </p>
+          </div>
+        </section>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}
+
+export default ModelDetails;
