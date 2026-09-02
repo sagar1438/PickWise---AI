@@ -33,3 +33,74 @@ const trendingModels = [
   },
 ];
 
+function Trending() {
+  return (
+    <div className="page">
+      <Navbar />
+
+      <main>
+        <section className="trending">
+          <div className="page__container">
+            <div className="trending__header fade-in">
+              <p className="section__eyebrow">TRENDING</p>
+
+              <h1 className="trending__title">
+                Models getting attention right now.
+              </h1>
+
+              <p className="trending__description">
+                Explore models currently highlighted by PickWise. Trend data
+                will be connected to verified external sources later.
+              </p>
+            </div>
+
+            <div className="trending__list">
+              {trendingModels.map((model) => (
+                <article className="card trending-card" key={model.name}>
+                  <div className="card__content">
+                    <div className="trending-card__rank">
+                      <span>#{model.rank}</span>
+                      <TrendingUp size={16} />
+                    </div>
+
+                    <div className="trending-card__main">
+                      <div className="trending-card__heading">
+                        <div>
+                          <p className="model-card__provider">
+                            {model.provider}
+                          </p>
+
+                          <h2 className="card__title">{model.name}</h2>
+                        </div>
+
+                        <ModelBadge variant="primary">
+                          {model.trend}
+                        </ModelBadge>
+                      </div>
+
+                      <p className="card__description">{model.reason}</p>
+
+                      <div className="card__meta">
+                        <ModelBadge>{model.category}</ModelBadge>
+
+                        {model.capabilities.map((capability) => (
+                          <ModelBadge key={capability} variant="accent">
+                            {capability}
+                          </ModelBadge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}
+
+export default Trending;
