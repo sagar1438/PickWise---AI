@@ -288,6 +288,82 @@
   margin-bottom: 16px;
 }
 
+/* Trending */
+
+.trending {
+  padding: 96px 0 110px;
+}
+
+.trending__header {
+  max-width: 800px;
+  margin-bottom: 48px;
+}
+
+.trending__title {
+  max-width: 820px;
+  font-size: clamp(44px, 6vw, 72px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.06em;
+}
+
+.trending__description {
+  max-width: 620px;
+  margin-top: 24px;
+  color: var(--color-text-muted);
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+.trending__list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.trending-card {
+  height: 100%;
+}
+
+.trending-card__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.trending-card .card__content {
+  display: flex;
+  gap: 24px;
+}
+
+.trending-card__rank {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 52px;
+  padding-top: 4px;
+}
+
+.trending-card__rank span {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.trending-card__rank svg {
+  color: var(--color-success);
+}
+
+.trending-card__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.trending-card__heading .model-badge {
+  flex-shrink: 0;
+}
+
 /* Responsive */
 
 @media (max-width: 900px) {
@@ -340,19 +416,24 @@
     padding: 76px 0;
   }
 
-  .find-model {
+  .find-model,
+  .recommendations,
+  .discover,
+  .trending {
     padding: 72px 0 88px;
   }
 
   .find-model__title,
   .recommendations__title,
-  .discover__title {
+  .discover__title,
+  .trending__title {
     font-size: clamp(42px, 13vw, 60px);
   }
 
   .find-model__description,
   .recommendations__description,
-  .discover__description {
+  .discover__description,
+  .trending__description {
     font-size: 16px;
   }
 
@@ -364,11 +445,19 @@
     align-items: stretch;
   }
 
-  .recommendations {
-    padding: 72px 0 88px;
+  .trending-card .card__content {
+    flex-direction: column;
+    gap: 18px;
   }
 
-  .discover {
-    padding: 72px 0 88px;
+  .trending-card__rank {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .trending-card__heading {
+    flex-direction: column;
+    gap: 12px;
   }
 }
