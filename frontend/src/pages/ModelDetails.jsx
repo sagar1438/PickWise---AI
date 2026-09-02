@@ -89,3 +89,40 @@ const models = {
   },
 };
 
+function ModelDetails() {
+  const { id } = useParams();
+  const model = models[id];
+
+  if (!model) {
+    return (
+      <div className="page">
+        <Navbar />
+
+        <main>
+          <section className="model-details">
+            <div className="page__container">
+              <div className="model-details__not-found">
+                <p className="section__eyebrow">MODEL NOT FOUND</p>
+
+                <h1 className="model-details__title">
+                  We couldn't find that model.
+                </h1>
+
+                <p className="model-details__description">
+                  The model may not exist yet or may have been removed from
+                  the catalog.
+                </p>
+
+                <Button to="/discover" variant="secondary">
+                  Back to Discover
+                </Button>
+              </div>
+            </div>
+          </section>
+        </main>
+
+        <Footer />
+      </div>
+    );
+  }
+
