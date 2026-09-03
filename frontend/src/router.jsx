@@ -7,6 +7,7 @@ import Discover from "./pages/Discover";
 import Trending from "./pages/Trending";
 import NewReleases from "./pages/NewReleases";
 import Compare from "./pages/Compare";
+import ModelDetails from "./pages/ModelDetails";
 
 const router = createBrowserRouter([
   {
@@ -40,6 +41,10 @@ const router = createBrowserRouter([
       {
         path: "compare",
         element: <Compare />,
+      },
+      {
+        path: "models/:id",
+        element: <ModelDetails />,
       },
     ],
   },
