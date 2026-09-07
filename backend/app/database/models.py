@@ -67,3 +67,30 @@ class ModelMetrics(Base):
     model: Mapped["Model"] = relationship(back_populates="metrics")
 
 
+class ModelCapabilities(Base):
+    __tablename__ = "model_capabilities"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    model_id: Mapped[int] = mapped_column(
+        ForeignKey("models.id"),
+        nullable=False,
+        unique=True,
+    )
+    context_window: Mapped[int] = mapped_column(Integer, nullable=False)
+    supports_vision: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+    )
+    supports_audio: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+    )
+    supports_tools: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+    )
+
+    model: Mapped["Model"] = relationship(back_populates="capabilities")
