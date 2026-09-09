@@ -64,4 +64,64 @@ def seed_database():
         db.add_all(models)
         db.flush()
 
- 
+        metrics = [
+            ModelMetrics(
+                model_id=models[0].id,
+                cost_score=78,
+                speed_score=91,
+                quality_score=94,
+                reasoning_score=92,
+                coding_score=90,
+            ),
+            ModelMetrics(
+                model_id=models[1].id,
+                cost_score=92,
+                speed_score=96,
+                quality_score=89,
+                reasoning_score=84,
+                coding_score=88,
+            ),
+            ModelMetrics(
+                model_id=models[2].id,
+                cost_score=65,
+                speed_score=79,
+                quality_score=97,
+                reasoning_score=96,
+                coding_score=94,
+            ),
+        ]
+
+        capabilities = [
+            ModelCapabilities(
+                model_id=models[0].id,
+                context_window=128000,
+                supports_vision=True,
+                supports_audio=False,
+                supports_tools=True,
+            ),
+            ModelCapabilities(
+                model_id=models[1].id,
+                context_window=64000,
+                supports_vision=True,
+                supports_audio=True,
+                supports_tools=True,
+            ),
+            ModelCapabilities(
+                model_id=models[2].id,
+                context_window=200000,
+                supports_vision=True,
+                supports_audio=False,
+                supports_tools=True,
+            ),
+        ]
+
+        db.add_all(metrics)
+        db.add_all(capabilities)
+        db.commit()
+
+    finally:
+        db.close()
+
+
+if __name__ == "__main__":
+    seed_database()
