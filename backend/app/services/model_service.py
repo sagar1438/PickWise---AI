@@ -43,3 +43,15 @@ def get_trending_models(db: Session):
     )
 
 
+def get_new_releases(db: Session):
+    return (
+        db.query(Model)
+        .options(
+            joinedload(Model.provider),
+            joinedload(Model.metrics),
+            joinedload(Model.capabilities),
+        )
+        .filter(Model.release_date.is_not(None))
+        .order_by(Model.release_date.desc())
+        .all()
+    )
