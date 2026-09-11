@@ -41,3 +41,27 @@ def calculate_weights(request: RecommendationRequest):
         }
 
     return weights
+
+
+def calculate_context_score(model, request: RecommendationRequest):
+    if not model.capabilities:
+        return 0
+
+    context_window = model.capabilities.context_window
+
+    if request.large_context:
+        if context_window >= 200000:
+            return 100
+        if context_window >= 128000:
+            return 85
+        if context_window >= 64000:
+            return 65
+        return 40
+
+    if context_window >= 128000:
+        return 100
+    if context_window >= 64000:
+        return 85
+    return 70
+
+
