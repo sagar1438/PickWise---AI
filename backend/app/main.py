@@ -1,15 +1,26 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.database.database import Base, engine
 from app.routes.models import router as models_router
 from app.routes.recommendations import router as recommendations_router
 from app.routes.trending import router as trending_router
 from app.routes.releases import router as releases_router
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    Base.metadata.create_all(bind=engine)
+    yield
+
+
 app = FastAPI(
     title="PickWise - AI API",
     description="Backend API for the PickWise AI model recommendation platform.",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 app.add_middleware(
