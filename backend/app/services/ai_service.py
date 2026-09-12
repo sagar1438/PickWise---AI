@@ -36,3 +36,54 @@ Return this structure:
   "large_context": false
 }}
 
+Do not add markdown or any explanation.
+"""
+
+    response = client.interactions.create(
+        model=GEMINI_MODEL,
+        input=prompt,
+    )
+
+    return json.loads(response.output_text)
+
+
+def generate_recommendation_explanation(
+    requirements: str,
+    model_name: str,
+    provider: str,
+    score: float,
+):
+    client = get_client()
+
+    prompt = f"""
+Explain why this AI model is a good match for the user's requirements.
+
+User requirements:
+{requirements}
+
+Recommended model:
+{model_name}
+
+Provider:
+{provider}
+
+Match score:
+{score}%
+
+Return only valid JSON using this structure:
+{{
+  "strengths": ["...", "..."],
+  "weaknesses": ["...", "..."],
+  "why_recommended": "..."
+}}
+
+Keep the explanation concise and factual.
+Do not invent pricing, capabilities, benchmarks, or other model facts.
+"""
+
+    response = client.interactions.create(
+        model=GEMINI_MODEL,
+        input=prompt,
+    )
+
+    return json.loads(response.output_text)
