@@ -73,12 +73,12 @@ def calculate_feature_score(model, request: RecommendationRequest):
     capability_requirements = 0
 
     requirements = [
-        ("vision", request.vision, model.capabilities.supports_vision),
-        ("audio", request.audio, model.capabilities.supports_audio),
-        ("tools", request.tools, model.capabilities.supports_tools),
+        (request.vision, model.capabilities.supports_vision),
+        (request.audio, model.capabilities.supports_audio),
+        (request.tools, model.capabilities.supports_tools),
     ]
 
-    for _, required, supported in requirements:
+    for required, supported in requirements:
         if required:
             capability_requirements += 1
 
@@ -124,6 +124,7 @@ def calculate_match_score(model, request: RecommendationRequest):
     speed_score = model.metrics.speed_score
     quality_score = model.metrics.quality_score
     context_score = calculate_context_score(model, request)
+
     feature_score = (
         calculate_feature_score(model, request) * 0.5
         + calculate_task_score(model, request) * 0.5
