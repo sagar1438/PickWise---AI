@@ -1,43 +1,52 @@
+import { useEffect, useState } from "react";
 import { CalendarDays, ArrowUpRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import ModelBadge from "../components/ModelBadge";
-
-const releases = [
-  {
-    id: "model-g",
-    name: "Model G",
-    provider: "Provider G",
-    releaseDate: "Demo",
-    description:
-      "A newly added model focused on strong general-purpose performance.",
-    context: "128K",
-    capabilities: ["Chat", "Reasoning", "Tools"],
-  },
-  {
-    id: "model-h",
-    name: "Model H",
-    provider: "Provider H",
-    releaseDate: "Demo",
-    description:
-      "A multimodal model designed for applications that work with text and images.",
-    context: "200K",
-    capabilities: ["Vision", "Chat", "Reasoning"],
-  },
-  {
-    id: "model-i",
-    name: "Model I",
-    provider: "Provider I",
-    releaseDate: "Demo",
-    description:
-      "A recently added coding-oriented model for software development workflows.",
-    context: "128K",
-    capabilities: ["Coding", "Tools", "Chat"],
-  },
-];
+import LoadingState from "../components/LoadingState";
+import EmptyState from "../components/EmptyState";
+import { getNewReleases } from "../services/api";
 
 function NewReleases() {
+  const [models, setModels] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadNewReleases() {
+      try {
+        const data = await getNewReleases();
+        setModels(data);
+      } catch {
+        setModels([]);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadNewReleases();
+  }, []);
+
+  function formatReleaseDate(date) {
+    if (!date) {
+      return "Date unavailable";
+    }
+
+    return new Intl.DateTimeFormat("en", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }).format(new Date(date));
+  }
+
+  function formatContext(contextWindow) {
+    if (!contextWindow) {
+      return "Context unavailable";
+    }
+
+    return `${Math.round(contextWindow / 1000)}K Context`;
+  }
+
   return (
     <div className="page">
       <Navbar />
@@ -49,69 +58,86 @@ function NewReleases() {
               <p className="section__eyebrow">NEW RELEASES</p>
 
               <h1 className="releases__title">
-                Explore the latest models added to the catalog.
+                Explore recently released models.
               </h1>
 
               <p className="releases__description">
-                Browse recently added models and explore their capabilities,
-                context length, and intended use cases.
+                Browse models ordered by release date and explore their
+                available capabilities and context length.
               </p>
             </div>
 
-            <div className="releases__list">
-              {releases.map((model) => (
-                <article className="card release-card" key={model.id}>
-                  <div className="card__content">
-                    <div className="release-card__top">
-                      <ModelBadge variant="primary">New</ModelBadge>
+            {isLoading ? (
+              <LoadingState message="Loading new releases..." />
+            ) : models.length > 0 ? (
+              <div className="releases__list">
+                {models.map((model) => (
+                  <article className="card release-card" key={model.id}>
+                    <div className="card__content">
+                      <div className="release-card__top">
+                        <ModelBadge variant="primary">New</ModelBadge>
 
-                      <span className="release-card__date">
-                        <CalendarDays size={15} />
-                        {model.releaseDate}
-                      </span>
-                    </div>
-
-                    <div className="release-card__body">
-                      <div>
-                        <p className="model-card__provider">
-                          {model.provider}
-                        </p>
-
-                        <h2 className="card__title">{model.name}</h2>
+                        <span className="release-card__date">
+                          <CalendarDays size={15} />
+                          {formatReleaseDate(model.release_date)}
+                        </span>
                       </div>
 
-                      <Link
-                        to={`/models/${model.id}`}
-                        className="release-card__link"
-                        aria-label={`View ${model.name} details`}
-                      >
-                        <ArrowUpRight size={18} />
-                      </Link>
-                    </div>
+                      <div className="release-card__body">
+                        <div>
+                          <p className="model-card__provider">
+                            {model.provider?.name || "Unknown provider"}
+                          </p>
 
-                    <p className="card__description">
-                      {model.description}
-                    </p>
+                          <h2 className="card__title">{model.name}</h2>
+                        </div>
 
-                    <div className="card__meta">
-                      <ModelBadge variant="accent">
-                        {model.context} Context
-                      </ModelBadge>
+                        <Link
+                          to={`/models/${model.id}`}
+                          className="release-card__link"
+                          aria-label={`View ${model.name} details`}
+                        >
+                          <ArrowUpRight size={18} />
+                        </Link>
+                      </div>
 
-                      {model.capabilities.map((capability) => (
-                        <ModelBadge key={capability}>
-                          {capability}
+                      <p className="card__description">
+                        {model.description}
+                      </p>
+
+                      <div className="card__meta">
+                        <ModelBadge variant="accent">
+                          {formatContext(
+                            model.capabilities?.context_window
+                          )}
                         </ModelBadge>
-                      ))}
+
+                        {model.capabilities?.supports_vision && (
+                          <ModelBadge>Vision</ModelBadge>
+                        )}
+
+                        {model.capabilities?.supports_audio && (
+                          <ModelBadge>Audio</ModelBadge>
+                        )}
+
+                        {model.capabilities?.supports_tools && (
+                          <ModelBadge>Tools</ModelBadge>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </article>
-              ))}
-            </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                title="No releases available"
+                description="There are currently no release records available in the catalog."
+              />
+            )}
 
             <p className="releases__note">
-              Release information shown here is demo data and will be replaced
-              with verified current sources.
+              Release information is displayed from the PickWise model
+              catalog. Only verified data should be added to this dataset.
             </p>
           </div>
         </section>
