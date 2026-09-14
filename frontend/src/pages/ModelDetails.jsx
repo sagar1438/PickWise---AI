@@ -1,99 +1,113 @@
-import { ArrowLeft, Check, Code2, Eye, Gauge, Sparkles, Wrench, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  ArrowLeft,
+  Check,
+  Code2,
+  Eye,
+  Gauge,
+  Sparkles,
+  Wrench,
+  X,
+} from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import ModelBadge from "../components/ModelBadge";
 import Button from "../components/Button";
-
-const models = {
-  "model-a": {
-    name: "Model A",
-    provider: "Provider A",
-    category: "General Purpose",
-    description:
-      "A general-purpose AI model designed for reliable production applications across conversations, reasoning, and tool-based workflows.",
-    releaseDate: "Demo",
-    context: "128K tokens",
-    pricing: "Demo pricing",
-    strengths: [
-      "Strong overall quality",
-      "Good balance of speed and capability",
-      "Suitable for a wide range of applications",
-    ],
-    weaknesses: [
-      "May cost more than lightweight alternatives",
-      "Not optimized for every specialized workload",
-    ],
-    useCases: ["Chat applications", "Business automation", "AI assistants"],
-    capabilities: [
-      { name: "Reasoning", icon: Sparkles, supported: true },
-      { name: "Coding", icon: Code2, supported: true },
-      { name: "Vision", icon: Eye, supported: true },
-      { name: "Audio", icon: Gauge, supported: false },
-      { name: "Tools", icon: Wrench, supported: true },
-    ],
-  },
-  "model-b": {
-    name: "Model B",
-    provider: "Provider B",
-    category: "Coding",
-    description:
-      "A coding-oriented AI model focused on fast software development assistance and practical developer workflows.",
-    releaseDate: "Demo",
-    context: "64K tokens",
-    pricing: "Demo pricing",
-    strengths: [
-      "Fast responses",
-      "Strong coding capabilities",
-      "Cost-efficient for frequent requests",
-    ],
-    weaknesses: [
-      "Smaller context than some alternatives",
-      "Less focused on advanced multimodal tasks",
-    ],
-    useCases: ["Code generation", "Debugging", "Developer assistants"],
-    capabilities: [
-      { name: "Reasoning", icon: Sparkles, supported: true },
-      { name: "Coding", icon: Code2, supported: true },
-      { name: "Vision", icon: Eye, supported: true },
-      { name: "Audio", icon: Gauge, supported: true },
-      { name: "Tools", icon: Wrench, supported: true },
-    ],
-  },
-  "model-c": {
-    name: "Model C",
-    provider: "Provider C",
-    category: "Reasoning",
-    description:
-      "An advanced model aimed at complex reasoning workloads where response quality and long-context performance are important.",
-    releaseDate: "Demo",
-    context: "200K tokens",
-    pricing: "Demo pricing",
-    strengths: [
-      "Strong reasoning performance",
-      "Large context window",
-      "Good fit for complex workflows",
-    ],
-    weaknesses: [
-      "Higher cost",
-      "Slower for some workloads",
-    ],
-    useCases: ["Research", "Complex reasoning", "Long-context analysis"],
-    capabilities: [
-      { name: "Reasoning", icon: Sparkles, supported: true },
-      { name: "Coding", icon: Code2, supported: true },
-      { name: "Vision", icon: Eye, supported: true },
-      { name: "Audio", icon: Gauge, supported: false },
-      { name: "Tools", icon: Wrench, supported: true },
-    ],
-  },
-};
+import LoadingState from "../components/LoadingState";
+import { getModelById } from "../services/api";
 
 function ModelDetails() {
   const { id } = useParams();
-  const model = models[id];
 
-  if (!model) {
+  const [model, setModel] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function loadModel() {
+      try {
+        const data = await getModelById(id);
+        setModel(data);
+      } catch {
+        setError("Model not found.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadModel();
+  }, [id]);
+
+  function formatReleaseDate(date) {
+    if (!date) {
+      return "Date unavailable";
+    }
+
+    return new Intl.DateTimeFormat("en", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }).format(new Date(date));
+  }
+
+  function formatContext(contextWindow) {
+    if (!contextWindow) {
+      return "Unavailable";
+    }
+
+    return `${Math.round(contextWindow / 1000)}K tokens`;
+  }
+
+  function getCapabilities(modelData) {
+    return [
+      {
+        name: "Reasoning",
+        icon: Sparkles,
+        supported: Boolean(modelData.metrics?.reasoning_score),
+      },
+      {
+        name: "Coding",
+        icon: Code2,
+        supported: Boolean(modelData.metrics?.coding_score),
+      },
+      {
+        name: "Vision",
+        icon: Eye,
+        supported: Boolean(modelData.capabilities?.supports_vision),
+      },
+      {
+        name: "Audio",
+        icon: Gauge,
+        supported: Boolean(modelData.capabilities?.supports_audio),
+      },
+      {
+        name: "Tools",
+        icon: Wrench,
+        supported: Boolean(modelData.capabilities?.supports_tools),
+      },
+    ];
+  }
+
+  if (isLoading) {
+    return (
+      <div className="page">
+        <Navbar />
+
+        <main>
+          <section className="model-details">
+            <div className="page__container">
+              <LoadingState message="Loading model details..." />
+            </div>
+          </section>
+        </main>
+
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error || !model) {
     return (
       <div className="page">
         <Navbar />
@@ -109,8 +123,8 @@ function ModelDetails() {
                 </h1>
 
                 <p className="model-details__description">
-                  The model may not exist yet or may have been removed from
-                  the catalog.
+                  The model may not exist or may not be available in the
+                  current catalog.
                 </p>
 
                 <Button to="/discover" variant="secondary">
@@ -126,6 +140,9 @@ function ModelDetails() {
     );
   }
 
+  const providerName = model.provider?.name || "Unknown provider";
+  const capabilities = getCapabilities(model);
+
   return (
     <div className="page">
       <Navbar />
@@ -140,10 +157,11 @@ function ModelDetails() {
 
             <div className="model-details__hero fade-in">
               <div>
-                <p className="section__eyebrow">{model.provider}</p>
+                <p className="section__eyebrow">{providerName}</p>
 
                 <div className="model-details__title-row">
                   <h1 className="model-details__title">{model.name}</h1>
+
                   <ModelBadge variant="primary">
                     {model.category}
                   </ModelBadge>
@@ -166,17 +184,21 @@ function ModelDetails() {
             <div className="model-details__overview">
               <div>
                 <span>Release</span>
-                <strong>{model.releaseDate}</strong>
+                <strong>
+                  {formatReleaseDate(model.release_date)}
+                </strong>
               </div>
 
               <div>
                 <span>Context</span>
-                <strong>{model.context}</strong>
+                <strong>
+                  {formatContext(model.capabilities?.context_window)}
+                </strong>
               </div>
 
               <div>
-                <span>Pricing</span>
-                <strong>{model.pricing}</strong>
+                <span>Category</span>
+                <strong>{model.category}</strong>
               </div>
             </div>
 
@@ -188,7 +210,7 @@ function ModelDetails() {
                 </div>
 
                 <div className="model-details__capabilities">
-                  {model.capabilities.map((capability) => {
+                  {capabilities.map((capability) => {
                     const Icon = capability.icon;
 
                     return (
@@ -204,6 +226,7 @@ function ModelDetails() {
 
                         <div>
                           <strong>{capability.name}</strong>
+
                           <span>
                             {capability.supported
                               ? "Supported"
@@ -219,28 +242,62 @@ function ModelDetails() {
               <section className="model-details__section">
                 <div className="model-details__two-column">
                   <div>
-                    <p className="section__eyebrow">STRENGTHS</p>
+                    <p className="section__eyebrow">PERFORMANCE</p>
 
                     <ul className="detail-list">
-                      {model.strengths.map((strength) => (
-                        <li key={strength}>
-                          <Check size={16} />
-                          <span>{strength}</span>
-                        </li>
-                      ))}
+                      <li>
+                        <Check size={16} />
+                        <span>
+                          Quality score:{" "}
+                          {model.metrics?.quality_score ?? "N/A"}
+                        </span>
+                      </li>
+
+                      <li>
+                        <Check size={16} />
+                        <span>
+                          Speed score:{" "}
+                          {model.metrics?.speed_score ?? "N/A"}
+                        </span>
+                      </li>
+
+                      <li>
+                        <Check size={16} />
+                        <span>
+                          Reasoning score:{" "}
+                          {model.metrics?.reasoning_score ?? "N/A"}
+                        </span>
+                      </li>
+
+                      <li>
+                        <Check size={16} />
+                        <span>
+                          Coding score:{" "}
+                          {model.metrics?.coding_score ?? "N/A"}
+                        </span>
+                      </li>
                     </ul>
                   </div>
 
                   <div>
-                    <p className="section__eyebrow">WEAKNESSES</p>
+                    <p className="section__eyebrow">COST</p>
 
                     <ul className="detail-list">
-                      {model.weaknesses.map((weakness) => (
-                        <li key={weakness}>
-                          <X size={16} />
-                          <span>{weakness}</span>
-                        </li>
-                      ))}
+                      <li>
+                        <X size={16} />
+                        <span>
+                          Cost efficiency score:{" "}
+                          {model.metrics?.cost_score ?? "N/A"}
+                        </span>
+                      </li>
+
+                      <li>
+                        <X size={16} />
+                        <span>
+                          Detailed pricing will be shown once verified
+                          pricing data is added.
+                        </span>
+                      </li>
                     </ul>
                   </div>
                 </div>
@@ -248,22 +305,23 @@ function ModelDetails() {
 
               <section className="model-details__section">
                 <div className="model-details__section-header">
-                  <p className="section__eyebrow">USE CASES</p>
-                  <h2>Where it fits best.</h2>
+                  <p className="section__eyebrow">MODEL INFORMATION</p>
+                  <h2>Core information at a glance.</h2>
                 </div>
 
                 <div className="model-details__use-cases">
-                  {model.useCases.map((useCase) => (
-                    <ModelBadge key={useCase}>{useCase}</ModelBadge>
-                  ))}
+                  <ModelBadge>{providerName}</ModelBadge>
+                  <ModelBadge>{model.category}</ModelBadge>
+                  <ModelBadge variant="accent">
+                    {formatContext(model.capabilities?.context_window)}
+                  </ModelBadge>
+
+                  {model.is_trending && (
+                    <ModelBadge variant="success">Trending</ModelBadge>
+                  )}
                 </div>
               </section>
             </div>
-
-            <p className="model-details__note">
-              Model information shown here is temporary demo data and will be
-              replaced with verified model information from the backend.
-            </p>
           </div>
         </section>
       </main>
