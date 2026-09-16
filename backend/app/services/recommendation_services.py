@@ -62,6 +62,7 @@ def calculate_context_score(model, request: RecommendationRequest):
         return 100
     if context_window >= 64000:
         return 85
+
     return 70
 
 
@@ -111,7 +112,10 @@ def calculate_task_score(model, request: RecommendationRequest):
         "other": model.metrics.quality_score,
     }
 
-    return task_scores.get(request.task, model.metrics.quality_score)
+    return task_scores.get(
+        request.task,
+        model.metrics.quality_score,
+    )
 
 
 def calculate_match_score(model, request: RecommendationRequest):
@@ -120,21 +124,16 @@ def calculate_match_score(model, request: RecommendationRequest):
 
     weights = calculate_weights(request)
 
-    cost_score = model.metrics.cost_score
-    speed_score = model.metrics.speed_score
-    quality_score = model.metrics.quality_score
-    context_score = calculate_context_score(model, request)
-
     feature_score = (
         calculate_feature_score(model, request) * 0.5
         + calculate_task_score(model, request) * 0.5
     )
 
     score = (
-        cost_score * weights["cost"]
-        + speed_score * weights["speed"]
-        + quality_score * weights["quality"]
-        + context_score * weights["context"]
+        model.metrics.cost_score * weights["cost"]
+        + model.metrics.speed_score * weights["speed"]
+        + model.metrics.quality_score * weights["quality"]
+        + calculate_context_score(model, request) * weights["context"]
         + feature_score * weights["features"]
     )
 
@@ -155,17 +154,13 @@ def get_recommendations(
         .all()
     )
 
-    ranked_models = []
-
-    for model in models:
-        score = calculate_match_score(model, request)
-
-        ranked_models.append(
-            {
-                "model": model,
-                "score": score,
-            }
-        )
+    ranked_models = [
+        {
+            "model": model,
+            "score": calculate_match_score(model, request),
+        }
+        for model in models
+    ]
 
     ranked_models.sort(
         key=lambda item: item["score"],
