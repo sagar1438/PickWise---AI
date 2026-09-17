@@ -11,7 +11,7 @@ from app.services.ai_service import (
     generate_recommendation_explanation,
     parse_requirements,
 )
-from app.services.recommendation_service import get_recommendations
+from app.services.recommendation_services import get_recommendations
 
 
 router = APIRouter(
@@ -30,20 +30,11 @@ def create_recommendation(
 
         request_data = request.model_dump()
 
-        for field in [
-            "budget",
-            "priority",
-            "task",
-        ]:
+        for field in ["budget", "priority", "task"]:
             if request_data[field] is None:
                 request_data[field] = parsed_requirements.get(field)
 
-        for field in [
-            "vision",
-            "audio",
-            "tools",
-            "large_context",
-        ]:
+        for field in ["vision", "audio", "tools", "large_context"]:
             if not request_data[field]:
                 request_data[field] = parsed_requirements.get(field, False)
 
