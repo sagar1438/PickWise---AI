@@ -6,6 +6,7 @@
 @import url("./animations.css");
 @import url("./footer.css");
 @import url("./states.css");
+@import url("./shader-background.css");
 
 * {
   box-sizing: border-box;
@@ -20,7 +21,7 @@ html {
 body {
   min-width: 320px;
   min-height: 100vh;
-  background: var(--color-background);
+  background: #000000;
   color: var(--color-text);
   font-family:
     Inter,
