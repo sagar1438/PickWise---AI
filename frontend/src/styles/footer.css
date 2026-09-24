@@ -1,7 +1,8 @@
 .footer {
   margin-top: 96px;
-  border-top: 1px solid var(--color-border);
-  background: var(--color-surface);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(14px);
 }
 
 .footer__container {
@@ -16,6 +17,7 @@
 
 .footer__brand h2 {
   margin-bottom: 8px;
+  color: #ffffff;
   font-size: 18px;
   font-weight: 700;
   letter-spacing: -0.03em;
@@ -23,7 +25,7 @@
 
 .footer__brand p {
   max-width: 320px;
-  color: var(--color-text-muted);
+  color: #9b9b9b;
   font-size: 14px;
 }
 
@@ -34,23 +36,23 @@
 }
 
 .footer__links a {
-  color: var(--color-text-muted);
+  color: #9b9b9b;
   font-size: 14px;
   transition: color 0.2s ease;
 }
 
 .footer__links a:hover {
-  color: var(--color-text);
+  color: #ffffff;
 }
 
 .footer__bottom {
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   padding: 20px 24px;
   text-align: center;
 }
 
 .footer__bottom p {
-  color: var(--color-text-muted);
+  color: #777777;
   font-size: 13px;
 }
 
