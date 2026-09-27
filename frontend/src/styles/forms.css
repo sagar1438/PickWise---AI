@@ -5,7 +5,7 @@
 }
 
 .form-label {
-  color: var(--color-text);
+  color: #ffffff;
   font-size: 14px;
   font-weight: 600;
 }
@@ -14,14 +14,16 @@
 .form-textarea,
 .form-select {
   width: 100%;
-  border: 1px solid var(--color-border);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-sm);
-  background: var(--color-surface);
-  color: var(--color-text);
+  background: rgba(15, 15, 18, 0.78);
+  color: #ffffff;
   outline: none;
+  backdrop-filter: blur(10px);
   transition:
     border-color 0.2s ease,
-    box-shadow 0.2s ease;
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .form-input,
@@ -39,24 +41,30 @@
 
 .form-input::placeholder,
 .form-textarea::placeholder {
-  color: #999999;
+  color: #777777;
+}
+
+.form-select option {
+  background: #111113;
+  color: #ffffff;
 }
 
 .form-input:focus,
 .form-textarea:focus,
 .form-select:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(91, 92, 226, 0.1);
+  border-color: rgba(91, 92, 226, 0.7);
+  box-shadow: 0 0 0 3px rgba(91, 92, 226, 0.14);
+  background: rgba(18, 18, 22, 0.9);
 }
 
 .form-helper {
-  color: var(--color-text-muted);
+  color: #8f8f8f;
   font-size: 13px;
   line-height: 1.5;
 }
 
 .form-error {
-  color: #c74444;
+  color: #ff8585;
   font-size: 13px;
   line-height: 1.5;
 }
@@ -73,23 +81,26 @@
   align-items: center;
   width: 100%;
   min-height: 48px;
-  border: 1px solid var(--color-border);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-sm);
-  background: var(--color-surface);
+  background: rgba(15, 15, 18, 0.78);
+  backdrop-filter: blur(10px);
   transition:
     border-color 0.2s ease,
-    box-shadow 0.2s ease;
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .search-bar:focus-within {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(91, 92, 226, 0.1);
+  border-color: rgba(91, 92, 226, 0.7);
+  box-shadow: 0 0 0 3px rgba(91, 92, 226, 0.14);
+  background: rgba(18, 18, 22, 0.9);
 }
 
 .search-bar__icon {
   flex-shrink: 0;
   margin-left: 14px;
-  color: var(--color-text-muted);
+  color: #8f8f8f;
 }
 
 .search-bar__input {
@@ -100,12 +111,12 @@
   border: none;
   outline: none;
   background: transparent;
-  color: var(--color-text);
+  color: #ffffff;
   font-size: 14px;
 }
 
 .search-bar__input::placeholder {
-  color: #999999;
+  color: #777777;
 }
 
 .search-bar__clear {
@@ -117,15 +128,15 @@
   width: 28px;
   height: 28px;
   border-radius: 6px;
-  color: var(--color-text-muted);
+  color: #8f8f8f;
   transition:
     background-color 0.2s ease,
     color 0.2s ease;
 }
 
 .search-bar__clear:hover {
-  background: var(--color-background);
-  color: var(--color-text);
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
 }
 
 @media (max-width: 768px) {
