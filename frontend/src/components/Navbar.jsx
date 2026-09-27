@@ -1,6 +1,9 @@
-import { NavLink, Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
 function Navbar() {
+  const getNavClass = ({ isActive }) =>
+    `navbar__link ${isActive ? "active" : ""}`;
+
   return (
     <header className="navbar">
       <nav className="navbar__container">
@@ -9,40 +12,24 @@ function Navbar() {
         </Link>
 
         <div className="navbar__links">
-          <NavLink
-            to="/"
-            className={({ isActive }) =>
-              `navbar__link ${isActive ? "active" : ""}`
-            }
-          >
+          <NavLink to="/" className={getNavClass} end>
             Home
           </NavLink>
 
-          <NavLink
-            to="/discover"
-            className={({ isActive }) =>
-              `navbar__link ${isActive ? "active" : ""}`
-            }
-          >
+          <NavLink to="/discover" className={getNavClass}>
             Discover
           </NavLink>
 
-          <NavLink
-            to="/trending"
-            className={({ isActive }) =>
-              `navbar__link ${isActive ? "active" : ""}`
-            }
-          >
+          <NavLink to="/trending" className={getNavClass}>
             Trending
           </NavLink>
 
-          <NavLink
-            to="/releases"
-            className={({ isActive }) =>
-              `navbar__link ${isActive ? "active" : ""}`
-            }
-          >
+          <NavLink to="/releases" className={getNavClass}>
             New Releases
+          </NavLink>
+
+          <NavLink to="/compare" className={getNavClass}>
+            Compare
           </NavLink>
         </div>
 
