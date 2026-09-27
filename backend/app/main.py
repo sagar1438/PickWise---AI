@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -8,6 +9,9 @@ from app.routes.models import router as models_router
 from app.routes.recommendations import router as recommendations_router
 from app.routes.trending import router as trending_router
 from app.routes.releases import router as releases_router
+
+
+load_dotenv()
 
 
 @asynccontextmanager
