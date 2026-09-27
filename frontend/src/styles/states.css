@@ -5,13 +5,13 @@
   align-items: center;
   justify-content: center;
   gap: 14px;
-  color: var(--color-text-muted);
+  color: #9b9b9b;
 }
 
 .loading-state__spinner {
   width: 28px;
   height: 28px;
-  border: 3px solid #e7e7e7;
+  border: 3px solid rgba(255, 255, 255, 0.12);
   border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: loadingSpin 0.8s linear infinite;
@@ -29,20 +29,26 @@
   justify-content: center;
   gap: 10px;
   padding: 32px;
-  border: 1px dashed var(--color-border);
+  border: 1px dashed rgba(255, 255, 255, 0.14);
   border-radius: var(--radius-md);
-  background: var(--color-surface);
+  background: rgba(15, 15, 18, 0.72);
+  backdrop-filter: blur(12px);
   text-align: center;
 }
 
+.empty-state svg {
+  color: #8f8f8f;
+}
+
 .empty-state__title {
+  color: #ffffff;
   font-size: 18px;
   font-weight: 600;
 }
 
 .empty-state__description {
   max-width: 420px;
-  color: var(--color-text-muted);
+  color: #8f8f8f;
   font-size: 14px;
   line-height: 1.6;
 }
