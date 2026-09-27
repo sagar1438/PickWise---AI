@@ -1,17 +1,24 @@
+import { Link } from "react-router-dom";
+
 function Footer() {
   return (
     <footer className="footer">
       <div className="footer__container">
         <div className="footer__brand">
-          <h2>PickWise</h2>
+          <Link to="/" className="footer__logo">
+            PickWise
+          </Link>
+
           <p>Find the right AI model for your project.</p>
         </div>
 
-        <div className="footer__links">
-          <a href="#discover">Discover</a>
-          <a href="#trending">Trending</a>
-          <a href="#releases">New Releases</a>
-        </div>
+        <nav className="footer__links">
+          <Link to="/discover">Discover</Link>
+          <Link to="/trending">Trending</Link>
+          <Link to="/releases">New Releases</Link>
+          <Link to="/compare">Compare</Link>
+          <Link to="/find-model">Find My Model</Link>
+        </nav>
       </div>
 
       <div className="footer__bottom">
