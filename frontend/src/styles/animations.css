@@ -1,20 +1,20 @@
 .fade-in {
-  animation: fadeIn 0.5s ease forwards;
+  animation: fadeIn 0.6s ease forwards;
 }
 
 .slide-up {
-  animation: slideUp 0.5s ease forwards;
+  animation: slideUp 0.6s ease forwards;
 }
 
 .hover-lift {
   transition:
     transform 0.2s ease,
+    border-color 0.2s ease,
     box-shadow 0.2s ease;
 }
 
 .hover-lift:hover {
   transform: translateY(-3px);
-  box-shadow: var(--shadow-md);
 }
 
 @keyframes fadeIn {
@@ -30,7 +30,7 @@
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(14px);
   }
 
   to {
