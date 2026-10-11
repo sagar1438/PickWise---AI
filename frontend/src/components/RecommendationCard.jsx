@@ -12,19 +12,21 @@ function RecommendationCard({
   score,
   strengths = [],
   weaknesses = [],
-  cost,
-  speed,
-  context,
+  cost = "N/A",
+  speed = "N/A",
+  context = "N/A",
 }) {
   const isTopMatch = rank === 1;
 
   return (
-    <article className={`card recommendation-card ${isTopMatch ? "recommendation-card--top" : ""}`}>
+    <article
+      className={`card recommendation-card ${
+        isTopMatch ? "recommendation-card--top" : ""
+      }`}
+    >
       <div className="card__content">
         <div className="recommendation-card__header">
-          <div className="recommendation-card__rank">
-            #{rank}
-          </div>
+          <div className="recommendation-card__rank">#{rank}</div>
 
           <div className="recommendation-card__model">
             <p className="model-card__provider">{provider}</p>
@@ -38,8 +40,12 @@ function RecommendationCard({
             </div>
           </div>
 
-          <Link to={`/models/${id}`} className="recommendation-card__details">
-            <ArrowUpRight size={18} />
+          <Link
+            to={`/models/${id}`}
+            className="recommendation-card__details"
+            aria-label={`View details for ${name}`}
+          >
+            <ArrowUpRight size={18} aria-hidden="true" />
           </Link>
         </div>
 
@@ -69,11 +75,10 @@ function RecommendationCard({
         <div className="recommendation-card__columns">
           <div>
             <h4>Why it fits</h4>
-
             <ul>
-              {strengths.map((strength) => (
-                <li key={strength}>
-                  <Check size={15} />
+              {strengths.map((strength, index) => (
+                <li key={`${strength}-${index}`}>
+                  <Check size={15} aria-hidden="true" />
                   <span>{strength}</span>
                 </li>
               ))}
@@ -82,11 +87,10 @@ function RecommendationCard({
 
           <div>
             <h4>Trade-offs</h4>
-
             <ul>
-              {weaknesses.map((weakness) => (
-                <li key={weakness}>
-                  <X size={15} />
+              {weaknesses.map((weakness, index) => (
+                <li key={`${weakness}-${index}`}>
+                  <X size={15} aria-hidden="true" />
                   <span>{weakness}</span>
                 </li>
               ))}
