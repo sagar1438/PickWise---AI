@@ -19,13 +19,13 @@ function ModelCard({
             <h3 className="card__title">{name}</h3>
           </div>
 
-          <ArrowUpRight size={18} />
+          <ArrowUpRight size={18} aria-hidden="true" />
         </div>
 
         <p className="card__description">{description}</p>
 
         <div className="card__meta">
-          <ModelBadge>{category}</ModelBadge>
+          {category && <ModelBadge>{category}</ModelBadge>}
 
           {contextWindow && (
             <ModelBadge variant="accent">
@@ -37,7 +37,11 @@ function ModelCard({
         <div className="card__footer">
           <span className="model-card__label">Model details</span>
 
-          <Link to={`/models/${id}`} className="model-card__link">
+          <Link
+            to={`/models/${id}`}
+            className="model-card__link"
+            aria-label={`View details for ${name}`}
+          >
             View model
           </Link>
         </div>
