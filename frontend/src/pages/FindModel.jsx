@@ -6,20 +6,20 @@ import Footer from "../components/Footer";
 import Button from "../components/Button";
 import { getRecommendations } from "../services/api";
 
+const initialFormData = {
+  requirements: "",
+  budget: "",
+  priority: "",
+  task: "",
+  vision: false,
+  audio: false,
+  tools: false,
+  large_context: false,
+};
+
 function FindModel() {
   const navigate = useNavigate();
-
-  const [formData, setFormData] = useState({
-    requirements: "",
-    budget: "",
-    priority: "",
-    task: "",
-    vision: false,
-    audio: false,
-    tools: false,
-    large_context: false,
-  });
-
+  const [formData, setFormData] = useState(initialFormData);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -30,12 +30,16 @@ function FindModel() {
       ...current,
       [name]: type === "checkbox" ? checked : value,
     }));
+
+    if (error) setError("");
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
 
-    if (!formData.requirements.trim()) {
+    const requirements = formData.requirements.trim();
+
+    if (!requirements) {
       setError("Please describe what you're building.");
       return;
     }
@@ -45,25 +49,22 @@ function FindModel() {
 
     try {
       const data = await getRecommendations({
-        requirements: formData.requirements.trim(),
+        ...formData,
+        requirements,
         budget: formData.budget || null,
         priority: formData.priority || null,
         task: formData.task || null,
-        vision: formData.vision,
-        audio: formData.audio,
-        tools: formData.tools,
-        large_context: formData.large_context,
       });
 
       navigate("/recommendations", {
         state: {
-          requirements: formData.requirements,
-          recommendations: data.recommendations,
+          requirements,
+          recommendations: data?.recommendations ?? [],
         },
       });
-    } catch (requestError) {
+    } catch {
       setError(
-        "We couldn't generate recommendations right now. Please make sure the backend is running and try again."
+        "Unable to generate recommendations. Please check your connection and try again."
       );
     } finally {
       setIsLoading(false);
@@ -85,12 +86,16 @@ function FindModel() {
               </h1>
 
               <p className="find-model__description">
-                Describe your project in your own words. PickWise will analyze
-                your requirements and find the models that fit best.
+                Describe your project, select your priorities, and find
+                AI models that fit your requirements.
               </p>
             </div>
 
-            <form className="find-model__form" onSubmit={handleSubmit}>
+            <form
+              className="find-model__form"
+              onSubmit={handleSubmit}
+              aria-busy={isLoading}
+            >
               <div className="form-group">
                 <label htmlFor="requirements" className="form-label">
                   What are you building?
@@ -102,8 +107,16 @@ function FindModel() {
                   value={formData.requirements}
                   onChange={handleChange}
                   className="form-textarea find-model__textarea"
-                  placeholder="Example: I need a fast and affordable AI model for a customer-support chatbot. It should support long context, handle high traffic, and support image input."
+                  placeholder="Example: I need an affordable AI model for a customer-support chatbot with fast responses and image understanding."
+                  required
+                  minLength={5}
+                  maxLength={3000}
+                  aria-describedby={error ? "find-model-error" : undefined}
                 />
+
+                <span className="form-hint">
+                  {formData.requirements.length}/3000 characters
+                </span>
               </div>
 
               <div className="find-model__options">
@@ -119,7 +132,7 @@ function FindModel() {
                     onChange={handleChange}
                     className="form-select"
                   >
-                    <option value="">Select budget</option>
+                    <option value="">Any budget</option>
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
                     <option value="high">High</option>
@@ -138,7 +151,7 @@ function FindModel() {
                     onChange={handleChange}
                     className="form-select"
                   >
-                    <option value="">Select priority</option>
+                    <option value="">Balanced</option>
                     <option value="cost">Cost</option>
                     <option value="speed">Speed</option>
                     <option value="quality">Quality</option>
@@ -147,7 +160,7 @@ function FindModel() {
 
                 <div className="form-group">
                   <label htmlFor="task" className="form-label">
-                    Task
+                    Primary task
                   </label>
 
                   <select
@@ -157,7 +170,7 @@ function FindModel() {
                     onChange={handleChange}
                     className="form-select"
                   >
-                    <option value="">Select task</option>
+                    <option value="">Any task</option>
                     <option value="chat">Chat</option>
                     <option value="coding">Coding</option>
                     <option value="vision">Vision</option>
@@ -168,54 +181,39 @@ function FindModel() {
                 </div>
               </div>
 
-              <div className="find-model__capabilities">
-                <p className="form-label">Capabilities</p>
+              <fieldset className="find-model__capabilities">
+                <legend className="form-label">Required capabilities</legend>
 
-                <label className="capability-option">
-                  <input
-                    type="checkbox"
-                    name="vision"
-                    checked={formData.vision}
-                    onChange={handleChange}
-                  />
-                  <span>Vision</span>
-                </label>
+                {[
+                  { name: "vision", label: "Vision" },
+                  { name: "audio", label: "Audio" },
+                  { name: "tools", label: "Tool calling" },
+                  { name: "large_context", label: "Large context" },
+                ].map(({ name, label }) => (
+                  <label className="capability-option" key={name}>
+                    <input
+                      type="checkbox"
+                      name={name}
+                      checked={formData[name]}
+                      onChange={handleChange}
+                    />
+                    <span>{label}</span>
+                  </label>
+                ))}
+              </fieldset>
 
-                <label className="capability-option">
-                  <input
-                    type="checkbox"
-                    name="audio"
-                    checked={formData.audio}
-                    onChange={handleChange}
-                  />
-                  <span>Audio</span>
-                </label>
-
-                <label className="capability-option">
-                  <input
-                    type="checkbox"
-                    name="tools"
-                    checked={formData.tools}
-                    onChange={handleChange}
-                  />
-                  <span>Tools</span>
-                </label>
-
-                <label className="capability-option">
-                  <input
-                    type="checkbox"
-                    name="large_context"
-                    checked={formData.large_context}
-                    onChange={handleChange}
-                  />
-                  <span>Large context</span>
-                </label>
-              </div>
-
-              {error && <p className="form-error">{error}</p>}
+              {error && (
+                <p
+                  id="find-model-error"
+                  className="form-error"
+                  role="alert"
+                >
+                  {error}
+                </p>
+              )}
 
               <Button type="submit" disabled={isLoading}>
-                <Sparkles size={17} />
+                <Sparkles size={17} aria-hidden="true" />
                 {isLoading ? "Finding your match..." : "Find My Model"}
               </Button>
             </form>
