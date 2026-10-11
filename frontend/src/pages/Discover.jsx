@@ -17,67 +17,93 @@ function Discover() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     async function loadModels() {
       try {
         const data = await getModels();
-        setModels(data.length > 0 ? data : fallbackModels);
+        const modelList = Array.isArray(data)
+          ? data
+          : data?.models ?? data?.items ?? [];
+
+        if (isMounted) {
+          setModels(modelList.length > 0 ? modelList : fallbackModels);
+        }
       } catch {
-        setModels(fallbackModels);
+        if (isMounted) {
+          setModels(fallbackModels);
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
     loadModels();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const filteredModels = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase();
+    const query = search.trim().toLowerCase();
 
     const result = models.filter((model) => {
+      const provider =
+        typeof model.provider === "string"
+          ? model.provider
+          : model.provider?.name ?? "";
+
+      const modelCategory = String(model.category ?? "")
+        .toLowerCase()
+        .replace(/\s+/g, "-");
+
       const matchesSearch =
-        normalizedSearch === "" ||
-        model.name?.toLowerCase().includes(normalizedSearch) ||
-        model.provider?.name?.toLowerCase().includes(normalizedSearch) ||
-        model.provider?.toLowerCase().includes(normalizedSearch) ||
-        model.category?.toLowerCase().includes(normalizedSearch);
+        !query ||
+        String(model.name ?? "").toLowerCase().includes(query) ||
+        provider.toLowerCase().includes(query) ||
+        modelCategory.includes(query);
 
       const matchesCategory =
-        category === "all" ||
-        model.category?.toLowerCase().replace(/\s+/g, "-") === category;
+        category === "all" || modelCategory === category;
 
       return matchesSearch && matchesCategory;
     });
 
-    return [...result].sort((first, second) => {
+    return [...result].sort((a, b) => {
       if (sortBy === "name") {
-        return first.name.localeCompare(second.name);
+        return String(a.name ?? "").localeCompare(String(b.name ?? ""));
       }
 
-      if (sortBy === "quality") {
-        return (
-          (second.metrics?.quality_score || 0) -
-          (first.metrics?.quality_score || 0)
-        );
-      }
+      const metricKey = {
+        quality: "quality_score",
+        speed: "speed_score",
+        cost: "cost_score",
+      }[sortBy];
 
-      if (sortBy === "speed") {
+      if (metricKey) {
         return (
-          (second.metrics?.speed_score || 0) -
-          (first.metrics?.speed_score || 0)
-        );
-      }
-
-      if (sortBy === "cost") {
-        return (
-          (second.metrics?.cost_score || 0) -
-          (first.metrics?.cost_score || 0)
+          Number(b.metrics?.[metricKey] ?? 0) -
+          Number(a.metrics?.[metricKey] ?? 0)
         );
       }
 
       return 0;
     });
   }, [models, search, category, sortBy]);
+
+  const displayModels = filteredModels.map((model) => ({
+    ...model,
+    provider:
+      typeof model.provider === "string"
+        ? model.provider
+        : model.provider?.name ?? "Unknown provider",
+    contextWindow: model.capabilities?.context_window
+      ? `${Math.round(model.capabilities.context_window / 1000)}K`
+      : model.contextWindow,
+  }));
 
   return (
     <div className="page">
@@ -115,23 +141,17 @@ function Discover() {
               />
             </div>
 
+            {!isLoading && (
+              <p className="discover__results">
+                {filteredModels.length}{" "}
+                {filteredModels.length === 1 ? "model" : "models"} found
+              </p>
+            )}
+
             {isLoading ? (
               <LoadingState message="Loading models..." />
-            ) : filteredModels.length > 0 ? (
-              <ModelGrid
-                models={filteredModels.map((model) => ({
-                  ...model,
-                  provider:
-                    typeof model.provider === "string"
-                      ? model.provider
-                      : model.provider?.name || "Unknown provider",
-                  contextWindow: model.capabilities?.context_window
-                    ? `${Math.round(
-                        model.capabilities.context_window / 1000
-                      )}K`
-                    : model.contextWindow,
-                }))}
-              />
+            ) : displayModels.length > 0 ? (
+              <ModelGrid models={displayModels} />
             ) : (
               <EmptyState
                 title="No matching models"
