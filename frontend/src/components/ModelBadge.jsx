@@ -1,9 +1,17 @@
-function ModelBadge({ children, variant = "default" }) {
-  return (
-    <span className={`model-badge model-badge--${variant}`}>
-      {children}
-    </span>
-  );
+function ModelBadge({
+  children,
+  variant = "default",
+  className = "",
+}) {
+  const badgeClass = [
+    "model-badge",
+    `model-badge--${variant}`,
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  return <span className={badgeClass}>{children}</span>;
 }
 
 export default ModelBadge;
