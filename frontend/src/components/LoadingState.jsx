@@ -1,6 +1,11 @@
 function LoadingState({ message = "Loading..." }) {
   return (
-    <div className="loading-state">
+    <div
+      className="loading-state"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
       <div className="loading-state__spinner" aria-hidden="true" />
       <p>{message}</p>
     </div>
