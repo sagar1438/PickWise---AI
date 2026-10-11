@@ -1,24 +1,24 @@
 import { SlidersHorizontal } from "lucide-react";
 
 function FilterBar({
-  category,
+  category = "all",
   onCategoryChange,
-  sortBy,
+  sortBy = "name",
   onSortChange,
 }) {
   return (
     <div className="filter-bar">
       <div className="filter-bar__title">
-        <SlidersHorizontal size={17} />
+        <SlidersHorizontal size={17} aria-hidden="true" />
         <span>Filter models</span>
       </div>
 
       <div className="filter-bar__controls">
         <select
           value={category}
-          onChange={(event) => onCategoryChange(event.target.value)}
+          onChange={(event) => onCategoryChange?.(event.target.value)}
           className="form-select"
-          aria-label="Filter by category"
+          aria-label="Filter models by category"
         >
           <option value="all">All categories</option>
           <option value="chat">Chat</option>
@@ -32,9 +32,9 @@ function FilterBar({
 
         <select
           value={sortBy}
-          onChange={(event) => onSortChange(event.target.value)}
+          onChange={(event) => onSortChange?.(event.target.value)}
           className="form-select"
-          aria-label="Sort models"
+          aria-label="Sort models by"
         >
           <option value="name">Name</option>
           <option value="quality">Quality</option>
