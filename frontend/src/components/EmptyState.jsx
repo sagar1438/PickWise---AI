@@ -6,7 +6,7 @@ function EmptyState({
 }) {
   return (
     <div className="empty-state">
-      <SearchX size={28} />
+      <SearchX size={32} aria-hidden="true" />
 
       <h3 className="empty-state__title">{title}</h3>
 
