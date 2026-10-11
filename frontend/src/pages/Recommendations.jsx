@@ -1,15 +1,17 @@
-import { useLocation, Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import RecommendationCard from "../components/RecommendationCard";
+import EmptyState from "../components/EmptyState";
+import Button from "../components/Button";
 
 function Recommendations() {
   const location = useLocation();
-
-  const recommendations = location.state?.recommendations;
   const requirements = location.state?.requirements;
 
-  if (!recommendations) {
+  const recommendations = location.state?.recommendations;
+
+  if (!Array.isArray(recommendations)) {
     return <Navigate to="/find-model" replace />;
   }
 
@@ -28,8 +30,8 @@ function Recommendations() {
               </h1>
 
               <p className="recommendations__description">
-                Based on your project description, PickWise ranked the
-                available models using its recommendation scoring system.
+                PickWise ranked these AI models based on your project
+                requirements, priorities, and supported capabilities.
               </p>
 
               {requirements && (
@@ -40,24 +42,54 @@ function Recommendations() {
               )}
             </div>
 
-            <div className="recommendations__list">
-              {recommendations.map((recommendation, index) => (
-                <RecommendationCard
-                  key={recommendation.model_id}
-                  rank={index + 1}
-                  id={recommendation.model_id}
-                  name={recommendation.model_name}
-                  provider={recommendation.provider}
-                  description={recommendation.why_recommended}
-                  score={recommendation.score}
-                  strengths={recommendation.strengths}
-                  weaknesses={recommendation.weaknesses}
-                  cost="Based on model data"
-                  speed="Based on model data"
-                  context="Based on model data"
+            {recommendations.length > 0 ? (
+              <>
+                <p className="recommendations__count">
+                  {recommendations.length}{" "}
+                  {recommendations.length === 1
+                    ? "model recommended"
+                    : "models recommended"}
+                </p>
+
+                <div className="recommendations__list">
+                  {recommendations.map((recommendation, index) => (
+                    <RecommendationCard
+                      key={`${recommendation.model_id}-${index}`}
+                      rank={index + 1}
+                      id={recommendation.model_id}
+                      name={recommendation.model_name}
+                      provider={recommendation.provider}
+                      description={recommendation.why_recommended}
+                      score={recommendation.score}
+                      strengths={
+                        Array.isArray(recommendation.strengths)
+                          ? recommendation.strengths
+                          : []
+                      }
+                      weaknesses={
+                        Array.isArray(recommendation.weaknesses)
+                          ? recommendation.weaknesses
+                          : []
+                      }
+                      cost="—"
+                      speed="—"
+                      context="—"
+                    />
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="recommendations__empty">
+                <EmptyState
+                  title="No recommendations found"
+                  description="Try changing your requirements or selecting different priorities."
                 />
-              ))}
-            </div>
+
+                <Button to="/find-model" variant="secondary">
+                  Update requirements
+                </Button>
+              </div>
+            )}
           </div>
         </section>
       </main>
