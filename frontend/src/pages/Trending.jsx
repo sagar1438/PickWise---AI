@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { TrendingUp } from "lucide-react";
+import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import ModelBadge from "../components/ModelBadge";
@@ -12,18 +13,35 @@ function Trending() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     async function loadTrendingModels() {
       try {
         const data = await getTrendingModels();
-        setModels(data);
+
+        const modelList = Array.isArray(data)
+          ? data
+          : data?.models ?? [];
+
+        if (isMounted) {
+          setModels(modelList);
+        }
       } catch {
-        setModels([]);
+        if (isMounted) {
+          setModels([]);
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
     loadTrendingModels();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
@@ -33,7 +51,7 @@ function Trending() {
       <main>
         <section className="trending">
           <div className="page__container">
-            <div className="trending__header fade-in">
+            <header className="trending__header fade-in">
               <p className="section__eyebrow">TRENDING</p>
 
               <h1 className="trending__title">
@@ -41,32 +59,38 @@ function Trending() {
               </h1>
 
               <p className="trending__description">
-                Explore models currently marked as trending in the PickWise
-                catalog. Trend indicators will later be connected to verified
-                current data sources.
+                Explore popular AI models and compare their capabilities
+                to find the right fit for your project.
               </p>
-            </div>
+            </header>
 
             {isLoading ? (
               <LoadingState message="Loading trending models..." />
             ) : models.length > 0 ? (
               <div className="trending__list">
                 {models.map((model, index) => (
-                  <article className="card trending-card" key={model.id}>
+                  <article
+                    className="card trending-card"
+                    key={model.id ?? `${model.name}-${index}`}
+                  >
                     <div className="card__content">
                       <div className="trending-card__rank">
                         <span>#{index + 1}</span>
-                        <TrendingUp size={16} />
+                        <TrendingUp size={16} aria-hidden="true" />
                       </div>
 
                       <div className="trending-card__main">
                         <div className="trending-card__heading">
                           <div>
                             <p className="model-card__provider">
-                              {model.provider?.name || "Unknown provider"}
+                              {model.provider?.name ??
+                                model.provider ??
+                                "Unknown provider"}
                             </p>
 
-                            <h2 className="card__title">{model.name}</h2>
+                            <h2 className="card__title">
+                              {model.name ?? "Unnamed model"}
+                            </h2>
                           </div>
 
                           <ModelBadge variant="success">
@@ -75,24 +99,51 @@ function Trending() {
                         </div>
 
                         <p className="card__description">
-                          {model.description}
+                          {model.description ??
+                            "No description available."}
                         </p>
 
                         <div className="card__meta">
-                          <ModelBadge>{model.category}</ModelBadge>
+                          {model.category && (
+                            <ModelBadge>
+                              {model.category}
+                            </ModelBadge>
+                          )}
 
                           {model.capabilities?.supports_vision && (
-                            <ModelBadge variant="accent">Vision</ModelBadge>
+                            <ModelBadge variant="accent">
+                              Vision
+                            </ModelBadge>
                           )}
 
                           {model.capabilities?.supports_audio && (
-                            <ModelBadge variant="accent">Audio</ModelBadge>
+                            <ModelBadge variant="accent">
+                              Audio
+                            </ModelBadge>
                           )}
 
                           {model.capabilities?.supports_tools && (
-                            <ModelBadge variant="accent">Tools</ModelBadge>
+                            <ModelBadge variant="accent">
+                              Tools
+                            </ModelBadge>
                           )}
                         </div>
+
+                        {model.id && (
+                          <div className="card__footer">
+                            <span className="model-card__label">
+                              Explore model
+                            </span>
+
+                            <Link
+                              to={`/models/${model.id}`}
+                              className="model-card__link"
+                              aria-label={`View details for ${model.name}`}
+                            >
+                              View details
+                            </Link>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </article>
@@ -101,7 +152,7 @@ function Trending() {
             ) : (
               <EmptyState
                 title="No trending models available"
-                description="There are currently no verified trending models in the catalog."
+                description="There are currently no trending models in the catalog."
               />
             )}
           </div>
