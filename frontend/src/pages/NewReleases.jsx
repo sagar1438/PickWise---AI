@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CalendarDays, ArrowUpRight } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -13,132 +13,143 @@ function NewReleases() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     async function loadNewReleases() {
       try {
         const data = await getNewReleases();
-        setModels(data);
+
+        const modelList = Array.isArray(data)
+          ? data
+          : data?.models ?? data?.items ?? [];
+
+        if (isMounted) {
+          setModels(modelList);
+        }
       } catch {
-        setModels([]);
+        if (isMounted) {
+          setModels([]);
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
     loadNewReleases();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
-
-  function formatReleaseDate(date) {
-    if (!date) {
-      return "Date unavailable";
-    }
-
-    return new Intl.DateTimeFormat("en", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }).format(new Date(date));
-  }
-
-  function formatContext(contextWindow) {
-    if (!contextWindow) {
-      return "Context unavailable";
-    }
-
-    return `${Math.round(contextWindow / 1000)}K Context`;
-  }
 
   return (
     <div className="page">
       <Navbar />
 
       <main>
-        <section className="releases">
+        <section className="new-releases">
           <div className="page__container">
-            <div className="releases__header fade-in">
+            <header className="new-releases__header fade-in">
               <p className="section__eyebrow">NEW RELEASES</p>
 
-              <h1 className="releases__title">
-                Explore recently released models.
+              <h1 className="new-releases__title">
+                Meet the latest AI models.
               </h1>
 
-              <p className="releases__description">
-                Browse models ordered by release date and explore their
-                available capabilities and context length.
+              <p className="new-releases__description">
+                Explore recently released models and discover new
+                capabilities for your next project.
               </p>
-            </div>
+            </header>
 
             {isLoading ? (
               <LoadingState message="Loading new releases..." />
             ) : models.length > 0 ? (
-              <div className="releases__list">
-                {models.map((model) => (
-                  <article className="card release-card" key={model.id}>
-                    <div className="card__content">
-                      <div className="release-card__top">
-                        <ModelBadge variant="primary">New</ModelBadge>
+              <div className="new-releases__grid">
+                {models.map((model, index) => {
+                  const modelId = model.id ?? model.model_id;
+                  const provider =
+                    typeof model.provider === "string"
+                      ? model.provider
+                      : model.provider?.name ?? "Unknown provider";
 
-                        <span className="release-card__date">
-                          <CalendarDays size={15} />
-                          {formatReleaseDate(model.release_date)}
-                        </span>
-                      </div>
+                  return (
+                    <article
+                      className="card new-release-card"
+                      key={modelId ?? `${model.name}-${index}`}
+                    >
+                      <div className="card__content">
+                        <div className="new-release-card__top">
+                          <span className="new-release-card__icon">
+                            <Sparkles size={20} aria-hidden="true" />
+                          </span>
 
-                      <div className="release-card__body">
-                        <div>
-                          <p className="model-card__provider">
-                            {model.provider?.name || "Unknown provider"}
-                          </p>
-
-                          <h2 className="card__title">{model.name}</h2>
+                          <ModelBadge variant="primary">
+                            New
+                          </ModelBadge>
                         </div>
 
-                        <Link
-                          to={`/models/${model.id}`}
-                          className="release-card__link"
-                          aria-label={`View ${model.name} details`}
-                        >
-                          <ArrowUpRight size={18} />
-                        </Link>
-                      </div>
+                        <p className="model-card__provider">
+                          {provider}
+                        </p>
 
-                      <p className="card__description">
-                        {model.description}
-                      </p>
+                        <h2 className="card__title">
+                          {model.name ?? "Unnamed model"}
+                        </h2>
 
-                      <div className="card__meta">
-                        <ModelBadge variant="accent">
-                          {formatContext(
-                            model.capabilities?.context_window
+                        <p className="card__description">
+                          {model.description ??
+                            "Explore this recently released AI model."}
+                        </p>
+
+                        <div className="card__meta">
+                          {model.category && (
+                            <ModelBadge>
+                              {model.category}
+                            </ModelBadge>
                           )}
-                        </ModelBadge>
 
-                        {model.capabilities?.supports_vision && (
-                          <ModelBadge>Vision</ModelBadge>
-                        )}
+                          {model.capabilities?.supports_vision && (
+                            <ModelBadge variant="accent">
+                              Vision
+                            </ModelBadge>
+                          )}
 
-                        {model.capabilities?.supports_audio && (
-                          <ModelBadge>Audio</ModelBadge>
-                        )}
+                          {model.capabilities?.supports_tools && (
+                            <ModelBadge variant="accent">
+                              Tool calling
+                            </ModelBadge>
+                          )}
+                        </div>
 
-                        {model.capabilities?.supports_tools && (
-                          <ModelBadge>Tools</ModelBadge>
+                        {modelId && (
+                          <div className="card__footer">
+                            <span className="model-card__label">
+                              Recently added
+                            </span>
+
+                            <Link
+                              to={`/models/${modelId}`}
+                              className="model-card__link"
+                              aria-label={`View details for ${model.name}`}
+                            >
+                              Explore model
+                            </Link>
+                          </div>
                         )}
                       </div>
-                    </div>
-                  </article>
-                ))}
+                    </article>
+                  );
+                })}
               </div>
             ) : (
               <EmptyState
-                title="No releases available"
-                description="There are currently no release records available in the catalog."
+                title="No new releases available"
+                description="Check back later to explore newly added AI models."
               />
             )}
-
-            <p className="releases__note">
-              Release information is displayed from the PickWise model
-              catalog. Only verified data should be added to this dataset.
-            </p>
           </div>
         </section>
       </main>
