@@ -25,75 +25,103 @@ function ModelDetails() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    let isMounted = true;
+
     async function loadModel() {
+      setIsLoading(true);
+      setError("");
+      setModel(null);
+
       try {
         const data = await getModelById(id);
-        setModel(data);
+
+        if (isMounted) {
+          setModel(data);
+        }
       } catch {
-        setError("Model not found.");
+        if (isMounted) {
+          setError("Model not found.");
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
     loadModel();
+
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
   function formatReleaseDate(date) {
-    if (!date) {
-      return "Date unavailable";
+    if (!date) return "Unavailable";
+
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return "Unavailable";
     }
 
     return new Intl.DateTimeFormat("en", {
       month: "short",
       day: "numeric",
       year: "numeric",
-    }).format(new Date(date));
+    }).format(parsedDate);
   }
 
   function formatContext(contextWindow) {
-    if (!contextWindow) {
+    const value = Number(contextWindow);
+
+    if (!Number.isFinite(value) || value <= 0) {
       return "Unavailable";
     }
 
-    return `${Math.round(contextWindow / 1000)}K tokens`;
+    return `${Math.round(value / 1000)}K tokens`;
   }
 
-  function getCapabilities(modelData) {
-    return [
-      {
-        name: "Reasoning",
-        icon: Sparkles,
-        supported: Boolean(modelData.metrics?.reasoning_score),
-      },
-      {
-        name: "Coding",
-        icon: Code2,
-        supported: Boolean(modelData.metrics?.coding_score),
-      },
-      {
-        name: "Vision",
-        icon: Eye,
-        supported: Boolean(modelData.capabilities?.supports_vision),
-      },
-      {
-        name: "Audio",
-        icon: Gauge,
-        supported: Boolean(modelData.capabilities?.supports_audio),
-      },
-      {
-        name: "Tools",
-        icon: Wrench,
-        supported: Boolean(modelData.capabilities?.supports_tools),
-      },
-    ];
+  function formatScore(score) {
+    const value = Number(score);
+
+    return Number.isFinite(value) ? value : "N/A";
   }
+
+  const capabilities = model
+    ? [
+        {
+          name: "Reasoning",
+          icon: Sparkles,
+          supported: Number(model.metrics?.reasoning_score) > 0,
+        },
+        {
+          name: "Coding",
+          icon: Code2,
+          supported: Number(model.metrics?.coding_score) > 0,
+        },
+        {
+          name: "Vision",
+          icon: Eye,
+          supported: Boolean(model.capabilities?.supports_vision),
+        },
+        {
+          name: "Audio",
+          icon: Gauge,
+          supported: Boolean(model.capabilities?.supports_audio),
+        },
+        {
+          name: "Tool calling",
+          icon: Wrench,
+          supported: Boolean(model.capabilities?.supports_tools),
+        },
+      ]
+    : [];
 
   if (isLoading) {
     return (
       <div className="page">
         <Navbar />
-
         <main>
           <section className="model-details">
             <div className="page__container">
@@ -101,7 +129,6 @@ function ModelDetails() {
             </div>
           </section>
         </main>
-
         <Footer />
       </div>
     );
@@ -111,7 +138,6 @@ function ModelDetails() {
     return (
       <div className="page">
         <Navbar />
-
         <main>
           <section className="model-details">
             <div className="page__container">
@@ -123,8 +149,7 @@ function ModelDetails() {
                 </h1>
 
                 <p className="model-details__description">
-                  The model may not exist or may not be available in the
-                  current catalog.
+                  This model may not exist or may no longer be available.
                 </p>
 
                 <Button to="/discover" variant="secondary">
@@ -134,14 +159,17 @@ function ModelDetails() {
             </div>
           </section>
         </main>
-
         <Footer />
       </div>
     );
   }
 
-  const providerName = model.provider?.name || "Unknown provider";
-  const capabilities = getCapabilities(model);
+  const providerName =
+    typeof model.provider === "string"
+      ? model.provider
+      : model.provider?.name ?? "Unknown provider";
+
+  const category = model.category ?? "Uncategorized";
 
   return (
     <div className="page">
@@ -151,7 +179,7 @@ function ModelDetails() {
         <section className="model-details">
           <div className="page__container">
             <Link to="/discover" className="model-details__back">
-              <ArrowLeft size={16} />
+              <ArrowLeft size={16} aria-hidden="true" />
               Back to Discover
             </Link>
 
@@ -160,37 +188,42 @@ function ModelDetails() {
                 <p className="section__eyebrow">{providerName}</p>
 
                 <div className="model-details__title-row">
-                  <h1 className="model-details__title">{model.name}</h1>
+                  <h1 className="model-details__title">
+                    {model.name ?? "Unnamed model"}
+                  </h1>
 
                   <ModelBadge variant="primary">
-                    {model.category}
+                    {category}
                   </ModelBadge>
                 </div>
 
                 <p className="model-details__description">
-                  {model.description}
+                  {model.description ?? "No description available."}
                 </p>
               </div>
 
               <div className="model-details__actions">
-                <Button to={`/compare?model=${model.id}`} variant="secondary">
+                <Button
+                  to={`/compare?model=${encodeURIComponent(model.id ?? id)}`}
+                  variant="secondary"
+                >
                   Compare model
                 </Button>
 
-                <Button to="/find-model">Find my match</Button>
+                <Button to="/find-model">
+                  Find my match
+                </Button>
               </div>
             </div>
 
             <div className="model-details__overview">
               <div>
                 <span>Release</span>
-                <strong>
-                  {formatReleaseDate(model.release_date)}
-                </strong>
+                <strong>{formatReleaseDate(model.release_date)}</strong>
               </div>
 
               <div>
-                <span>Context</span>
+                <span>Context window</span>
                 <strong>
                   {formatContext(model.capabilities?.context_window)}
                 </strong>
@@ -198,7 +231,7 @@ function ModelDetails() {
 
               <div>
                 <span>Category</span>
-                <strong>{model.category}</strong>
+                <strong>{category}</strong>
               </div>
             </div>
 
@@ -222,11 +255,10 @@ function ModelDetails() {
                         }`}
                         key={capability.name}
                       >
-                        <Icon size={18} />
+                        <Icon size={18} aria-hidden="true" />
 
                         <div>
                           <strong>{capability.name}</strong>
-
                           <span>
                             {capability.supported
                               ? "Supported"
@@ -246,34 +278,34 @@ function ModelDetails() {
 
                     <ul className="detail-list">
                       <li>
-                        <Check size={16} />
+                        <Check size={16} aria-hidden="true" />
                         <span>
                           Quality score:{" "}
-                          {model.metrics?.quality_score ?? "N/A"}
+                          {formatScore(model.metrics?.quality_score)}
                         </span>
                       </li>
 
                       <li>
-                        <Check size={16} />
+                        <Check size={16} aria-hidden="true" />
                         <span>
                           Speed score:{" "}
-                          {model.metrics?.speed_score ?? "N/A"}
+                          {formatScore(model.metrics?.speed_score)}
                         </span>
                       </li>
 
                       <li>
-                        <Check size={16} />
+                        <Check size={16} aria-hidden="true" />
                         <span>
                           Reasoning score:{" "}
-                          {model.metrics?.reasoning_score ?? "N/A"}
+                          {formatScore(model.metrics?.reasoning_score)}
                         </span>
                       </li>
 
                       <li>
-                        <Check size={16} />
+                        <Check size={16} aria-hidden="true" />
                         <span>
                           Coding score:{" "}
-                          {model.metrics?.coding_score ?? "N/A"}
+                          {formatScore(model.metrics?.coding_score)}
                         </span>
                       </li>
                     </ul>
@@ -284,18 +316,17 @@ function ModelDetails() {
 
                     <ul className="detail-list">
                       <li>
-                        <X size={16} />
+                        <X size={16} aria-hidden="true" />
                         <span>
                           Cost efficiency score:{" "}
-                          {model.metrics?.cost_score ?? "N/A"}
+                          {formatScore(model.metrics?.cost_score)}
                         </span>
                       </li>
 
                       <li>
-                        <X size={16} />
+                        <X size={16} aria-hidden="true" />
                         <span>
-                          Detailed pricing will be shown once verified
-                          pricing data is added.
+                          Verified pricing information is not yet available.
                         </span>
                       </li>
                     </ul>
@@ -311,13 +342,16 @@ function ModelDetails() {
 
                 <div className="model-details__use-cases">
                   <ModelBadge>{providerName}</ModelBadge>
-                  <ModelBadge>{model.category}</ModelBadge>
+                  <ModelBadge>{category}</ModelBadge>
+
                   <ModelBadge variant="accent">
                     {formatContext(model.capabilities?.context_window)}
                   </ModelBadge>
 
                   {model.is_trending && (
-                    <ModelBadge variant="success">Trending</ModelBadge>
+                    <ModelBadge variant="success">
+                      Trending
+                    </ModelBadge>
                   )}
                 </div>
               </section>
