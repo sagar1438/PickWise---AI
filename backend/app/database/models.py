@@ -1,6 +1,14 @@
 from datetime import date
 
-from sqlalchemy import Boolean, Date, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import (
+    Boolean,
+    Date,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.database import Base
@@ -9,10 +17,18 @@ from app.database.database import Base
 class Provider(Base):
     __tablename__ = "providers"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    name: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
-    website: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    logo: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, index=True
+    )
+    name: Mapped[str] = mapped_column(
+        String(100), nullable=False, unique=True
+    )
+    website: Mapped[str | None] = mapped_column(
+        String(255), nullable=True
+    )
+    logo: Mapped[str | None] = mapped_column(
+        String(255), nullable=True
+    )
 
     models: Mapped[list["Model"]] = relationship(
         back_populates="provider",
@@ -23,74 +39,105 @@ class Provider(Base):
 class Model(Base):
     __tablename__ = "models"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    provider_id: Mapped[int] = mapped_column(
-        ForeignKey("providers.id"),
-        nullable=False,
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, index=True
     )
-    name: Mapped[str] = mapped_column(String(100), nullable=False)
-    description: Mapped[str] = mapped_column(Text, nullable=False)
-    category: Mapped[str] = mapped_column(String(50), nullable=False)
-    release_date: Mapped[date | None] = mapped_column(Date, nullable=True)
-    is_trending: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    provider_id: Mapped[int] = mapped_column(
+        ForeignKey("providers.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    name: Mapped[str] = mapped_column(
+        String(100), nullable=False
+    )
+    description: Mapped[str] = mapped_column(
+        Text, nullable=False
+    )
+    category: Mapped[str] = mapped_column(
+        String(50), nullable=False, index=True
+    )
+    release_date: Mapped[date | None] = mapped_column(
+        Date, nullable=True, index=True
+    )
+    is_trending: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False, index=True
+    )
 
-    provider: Mapped["Provider"] = relationship(back_populates="models")
+    provider: Mapped["Provider"] = relationship(
+        back_populates="models"
+    )
 
     metrics: Mapped["ModelMetrics | None"] = relationship(
         back_populates="model",
         cascade="all, delete-orphan",
         uselist=False,
+        passive_deletes=True,
     )
 
     capabilities: Mapped["ModelCapabilities | None"] = relationship(
         back_populates="model",
         cascade="all, delete-orphan",
         uselist=False,
+        passive_deletes=True,
     )
 
 
 class ModelMetrics(Base):
     __tablename__ = "model_metrics"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, index=True
+    )
     model_id: Mapped[int] = mapped_column(
-        ForeignKey("models.id"),
+        ForeignKey("models.id", ondelete="CASCADE"),
         nullable=False,
         unique=True,
     )
-    cost_score: Mapped[float] = mapped_column(Float, nullable=False)
-    speed_score: Mapped[float] = mapped_column(Float, nullable=False)
-    quality_score: Mapped[float] = mapped_column(Float, nullable=False)
-    reasoning_score: Mapped[float] = mapped_column(Float, nullable=False)
-    coding_score: Mapped[float] = mapped_column(Float, nullable=False)
+    cost_score: Mapped[float] = mapped_column(
+        Float, nullable=False
+    )
+    speed_score: Mapped[float] = mapped_column(
+        Float, nullable=False
+    )
+    quality_score: Mapped[float] = mapped_column(
+        Float, nullable=False
+    )
+    reasoning_score: Mapped[float] = mapped_column(
+        Float, nullable=False
+    )
+    coding_score: Mapped[float] = mapped_column(
+        Float, nullable=False
+    )
 
-    model: Mapped["Model"] = relationship(back_populates="metrics")
+    model: Mapped["Model"] = relationship(
+        back_populates="metrics"
+    )
 
 
 class ModelCapabilities(Base):
     __tablename__ = "model_capabilities"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, index=True
+    )
     model_id: Mapped[int] = mapped_column(
-        ForeignKey("models.id"),
+        ForeignKey("models.id", ondelete="CASCADE"),
         nullable=False,
         unique=True,
     )
-    context_window: Mapped[int] = mapped_column(Integer, nullable=False)
+    context_window: Mapped[int] = mapped_column(
+        Integer, nullable=False
+    )
     supports_vision: Mapped[bool] = mapped_column(
-        Boolean,
-        default=False,
-        nullable=False,
+        Boolean, default=False, nullable=False
     )
     supports_audio: Mapped[bool] = mapped_column(
-        Boolean,
-        default=False,
-        nullable=False,
+        Boolean, default=False, nullable=False
     )
     supports_tools: Mapped[bool] = mapped_column(
-        Boolean,
-        default=False,
-        nullable=False,
+        Boolean, default=False, nullable=False
     )
 
-    model: Mapped["Model"] = relationship(back_populates="capabilities")
+    model: Mapped["Model"] = relationship(
+        back_populates="capabilities"
+    )
