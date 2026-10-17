@@ -1,17 +1,18 @@
+import os
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
+
+load_dotenv()
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database.database import Base, engine
 from app.routes.models import router as models_router
 from app.routes.recommendations import router as recommendations_router
-from app.routes.trending import router as trending_router
 from app.routes.releases import router as releases_router
-
-
-load_dotenv()
+from app.routes.trending import router as trending_router
 
 
 @asynccontextmanager
@@ -27,9 +28,18 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+allowed_origins = [
+    origin.strip().rstrip("/")
+    for origin in os.getenv(
+        "FRONTEND_ORIGINS",
+        "http://localhost:5173",
+    ).split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -43,13 +53,9 @@ app.include_router(releases_router)
 
 @app.get("/")
 def root():
-    return {
-        "message": "PickWise - AI API is running",
-    }
+    return {"message": "PickWise - AI API is running"}
 
 
 @app.get("/health")
 def health_check():
-    return {
-        "status": "ok",
-    }
+    return {"status": "ok"}
