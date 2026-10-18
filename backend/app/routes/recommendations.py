@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -13,6 +15,7 @@ from app.services.ai_service import (
 )
 from app.services.recommendation_services import get_recommendations
 
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/api/recommendations",
@@ -25,31 +28,56 @@ def create_recommendation(
     request: RecommendationRequest,
     db: Session = Depends(get_db),
 ):
+    request_data = request.model_dump()
+
     try:
-        parsed_requirements = parse_requirements(request.requirements)
+        parsed = parse_requirements(request.requirements)
 
-        request_data = request.model_dump()
+        if isinstance(parsed, dict):
+            for field in ("budget", "priority", "task"):
+                if request_data[field] is None:
+                    request_data[field] = parsed.get(field)
 
-        for field in ["budget", "priority", "task"]:
-            if request_data[field] is None:
-                request_data[field] = parsed_requirements.get(field)
+            for field in ("vision", "audio", "tools", "large_context"):
+                if not request_data[field]:
+                    request_data[field] = parsed.get(field, False)
 
-        for field in ["vision", "audio", "tools", "large_context"]:
-            if not request_data[field]:
-                request_data[field] = parsed_requirements.get(field, False)
-
-        structured_request = RecommendationRequest(**request_data)
-
-        ranked_models = get_recommendations(
-            db,
-            structured_request,
+    except Exception:
+        logger.warning(
+            "AI requirement parsing failed; using provided requirements.",
+            exc_info=True,
         )
 
-        recommendations = []
+    structured_request = RecommendationRequest(**request_data)
 
-        for item in ranked_models:
-            model = item["model"]
+    try:
+        ranked_models = get_recommendations(db, structured_request)
+    except Exception as exc:
+        logger.exception("Failed to rank AI models.")
+        raise HTTPException(
+            status_code=500,
+            detail="Unable to rank models.",
+        ) from exc
 
+    recommendations = []
+
+    for item in ranked_models:
+        model = item["model"]
+
+        fallback_explanation = {
+            "strengths": [
+                "Ranked using the available model metrics and requirements."
+            ],
+            "weaknesses": [
+                "Verify current pricing and capabilities before choosing."
+            ],
+            "why_recommended": (
+                "This model was ranked using your requirements "
+                "and the available model data."
+            ),
+        }
+
+        try:
             explanation = generate_recommendation_explanation(
                 requirements=request.requirements,
                 model_name=model.name,
@@ -57,27 +85,36 @@ def create_recommendation(
                 score=item["score"],
             )
 
-            recommendations.append(
-                RecommendationItem(
-                    model_id=model.id,
-                    model_name=model.name,
-                    provider=model.provider.name,
-                    score=item["score"],
-                    strengths=explanation.get("strengths", []),
-                    weaknesses=explanation.get("weaknesses", []),
-                    why_recommended=explanation.get(
-                        "why_recommended",
-                        "This model matches the provided requirements.",
-                    ),
-                )
-            )
+            if not isinstance(explanation, dict):
+                explanation = fallback_explanation
 
-        return RecommendationResponse(
-            recommendations=recommendations,
+        except Exception:
+            logger.warning(
+                "AI explanation failed for model ID %s.",
+                model.id,
+                exc_info=True,
+            )
+            explanation = fallback_explanation
+
+        recommendations.append(
+            RecommendationItem(
+                model_id=model.id,
+                model_name=model.name,
+                provider=model.provider.name,
+                score=item["score"],
+                strengths=explanation.get(
+                    "strengths",
+                    fallback_explanation["strengths"],
+                ),
+                weaknesses=explanation.get(
+                    "weaknesses",
+                    fallback_explanation["weaknesses"],
+                ),
+                why_recommended=explanation.get(
+                    "why_recommended",
+                    fallback_explanation["why_recommended"],
+                ),
+            )
         )
 
-    except Exception as exc:
-        raise HTTPException(
-            status_code=500,
-            detail="Unable to generate recommendations.",
-        ) from exc
+    return RecommendationResponse(recommendations=recommendations)
