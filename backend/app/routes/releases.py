@@ -7,7 +7,7 @@ from app.services.model_service import get_new_releases
 
 router = APIRouter(
     prefix="/api/releases",
-    tags=["Releases"],
+    tags=["New Releases"],
 )
 
 
