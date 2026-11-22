@@ -61,3 +61,15 @@ export function getRecommendations(payload) {
     body: JSON.stringify(payload),
   });
 }
+
+export function searchCatalog(query = "", limit = 100) {
+  const params = new URLSearchParams({
+    limit: String(limit),
+  });
+
+  if (query.trim()) {
+    params.set("q", query.trim());
+  }
+
+  return request(`/api/catalog/?${params.toString()}`);
+}
