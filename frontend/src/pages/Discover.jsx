@@ -1,3 +1,4 @@
+
 import { useEffect, useMemo, useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -6,8 +7,7 @@ import FilterBar from "../components/FilterBar";
 import ModelGrid from "../components/ModelGrid";
 import LoadingState from "../components/LoadingState";
 import EmptyState from "../components/EmptyState";
-import { getModels } from "../services/api";
-import fallbackModels from "../data/fallbackModels";
+import { searchCatalog } from "../services/api";
 
 function Discover() {
   const [models, setModels] = useState([]);
@@ -15,37 +15,41 @@ function Discover() {
   const [category, setCategory] = useState("all");
   const [sortBy, setSortBy] = useState("name");
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let isMounted = true;
 
-    async function loadModels() {
+    const timer = setTimeout(async () => {
+      setIsLoading(true);
+      setError("");
+
       try {
-        const data = await getModels();
-        const modelList = Array.isArray(data)
-          ? data
-          : data?.models ?? data?.items ?? [];
+        const data = await searchCatalog(search, 100);
+        const modelList = data?.models ?? [];
 
         if (isMounted) {
-          setModels(modelList.length > 0 ? modelList : fallbackModels);
+          setModels(modelList);
         }
-      } catch {
+      } catch (err) {
         if (isMounted) {
-          setModels(fallbackModels);
+          setModels([]);
+          setError(
+            err?.message || "Unable to load live model catalog."
+          );
         }
       } finally {
         if (isMounted) {
           setIsLoading(false);
         }
       }
-    }
-
-    loadModels();
+    }, search.trim() ? 400 : 0);
 
     return () => {
       isMounted = false;
+      clearTimeout(timer);
     };
-  }, []);
+  }, [search]);
 
   const filteredModels = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -63,6 +67,7 @@ function Discover() {
       const matchesSearch =
         !query ||
         String(model.name ?? "").toLowerCase().includes(query) ||
+        String(model.id ?? "").toLowerCase().includes(query) ||
         provider.toLowerCase().includes(query) ||
         modelCategory.includes(query);
 
@@ -77,10 +82,16 @@ function Discover() {
         return String(a.name ?? "").localeCompare(String(b.name ?? ""));
       }
 
+      if (sortBy === "cost") {
+        const aCost = Number(a.pricing?.inputPerMillion ?? Infinity);
+        const bCost = Number(b.pricing?.inputPerMillion ?? Infinity);
+
+        return aCost - bCost;
+      }
+
       const metricKey = {
         quality: "quality_score",
         speed: "speed_score",
-        cost: "cost_score",
       }[sortBy];
 
       if (metricKey) {
@@ -100,9 +111,9 @@ function Discover() {
       typeof model.provider === "string"
         ? model.provider
         : model.provider?.name ?? "Unknown provider",
-    contextWindow: model.capabilities?.context_window
-      ? `${Math.round(model.capabilities.context_window / 1000)}K`
-      : model.contextWindow,
+    contextWindow: model.contextWindow
+      ? `${Math.round(model.contextWindow / 1000)}K`
+      : "Unknown",
   }));
 
   return (
@@ -141,7 +152,7 @@ function Discover() {
               />
             </div>
 
-            {!isLoading && (
+            {!isLoading && !error && (
               <p className="discover__results">
                 {filteredModels.length}{" "}
                 {filteredModels.length === 1 ? "model" : "models"} found
@@ -149,7 +160,12 @@ function Discover() {
             )}
 
             {isLoading ? (
-              <LoadingState message="Loading models..." />
+              <LoadingState message="Searching live AI catalog..." />
+            ) : error ? (
+              <EmptyState
+                title="Unable to load models"
+                description={error}
+              />
             ) : displayModels.length > 0 ? (
               <ModelGrid models={displayModels} />
             ) : (
