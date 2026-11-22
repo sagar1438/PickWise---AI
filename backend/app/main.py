@@ -7,6 +7,7 @@ load_dotenv()
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.routes.catalog import router as catalog_router
 
 from app.database.database import Base, engine
 from app.routes.models import router as models_router
@@ -49,6 +50,7 @@ app.include_router(models_router)
 app.include_router(recommendations_router)
 app.include_router(trending_router)
 app.include_router(releases_router)
+app.include_router(catalog_router)
 
 
 @app.get("/")
